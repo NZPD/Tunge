@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VyTaxian — Developer</title>
+    <meta name="description" content="VyTaxian is a Programming, UI and VFX developer with over 349.7M visits contributed."/>
+    <meta name="theme-color" content="#7c3aed"/>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><text x='50' y='62' text-anchor='middle' font-size='40' fill='white' font-weight='bold'>V</text></svg>"/>
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #000; color: #fff; min-height: 100vh;
+        }
+        a { text-decoration: none; color: inherit; }
+        img { max-width: 100%; display: block; }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            background: linear-gradient(to right, rgba(124,58,237,0.12), rgba(139,92,246,0.08), rgba(124,58,237,0.12));
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            transform: translateY(-100%); opacity: 0;
+        }
+        nav.visible { transform: translateY(0); opacity: 1; }
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;
+            display: flex; align-items: center; justify-content: space-between; height: 72px;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 0.6rem; }
+        .nav-logo .logo-icon { width: 42px; height: 42px; border-radius: 0.5rem; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: rgba(124,58,237,0.2); }
+        .nav-logo span { font-size: 1.35rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+        .nav-links { display: none; align-items: center; gap: 2.5rem; }
+        .nav-links a { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.7); position: relative; transition: color 0.3s; }
+        .nav-links a:hover { color: #c4b5fd; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: #a78bfa; transition: width 0.3s; }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-cta { display: none; padding: 0.6rem 1.25rem; border-radius: 999px; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font-size: 0.85rem; font-weight: 500; transition: opacity 0.3s; cursor: pointer; border: none; }
+        .nav-cta:hover { opacity: 0.9; }
+        .menu-toggle { display: block; background: none; border: none; color: #fff; cursor: pointer; padding: 0.25rem; }
+        @media (min-width: 768px) { .nav-links { display: flex; } .nav-cta { display: inline-flex; } .menu-toggle { display: none; } }
+
+        /* HERO */
+        .hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; background: #000; padding-top: 72px; }
+        .hero-bg-img { position: absolute; inset: 0; }
+        .hero-bg-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .hero-overlay { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 50% at 50% 40%, rgba(124,58,237,0.10) 0%, transparent 70%), linear-gradient(to top, #000, transparent 50%); }
+        .hero-content { position: relative; z-index: 10; max-width: 1200px; margin: 0 auto; width: 100%; padding: 4rem 1.5rem; }
+        .hero-label { font-size: 0.75rem; font-weight: 600; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1rem; }
+        .hero-content h1 {
+            font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 800; color: #fff; line-height: 1.05; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 30%, #a78bfa 70%, #7c3aed 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-username { font-size: 0.85rem; color: rgba(255,255,255,0.35); margin-bottom: 1.5rem; letter-spacing: 0.02em; }
+        .hero-content p { font-size: 1rem; color: rgba(255,255,255,0.55); max-width: 520px; margin-bottom: 2rem; line-height: 1.7; }
+        @media (min-width: 640px) { .hero-content p { font-size: 1.1rem; } }
+        .hero-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+        .tag {
+            font-size: 0.72rem; font-weight: 500; color: rgba(167,139,250,0.8);
+            padding: 0.3rem 0.8rem; border-radius: 999px;
+            background: rgba(124,58,237,0.12); border: 1px solid rgba(167,139,250,0.15);
+            letter-spacing: 0.03em;
+        }
+        .hero-stats { display: flex; gap: 1.5rem 2.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .hero-stats .stat-value { font-size: 1.4rem; font-weight: 700; color: #fff; }
+        .hero-stats .stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 0.1rem; }
+        .hero-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+        .hero-buttons .btn-primary {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.75rem; border-radius: 0.5rem;
+            background: rgba(124,58,237,0.25); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08); color: #fff; font-weight: 500; font-size: 0.95rem; transition: background 0.2s;
+        }
+        .hero-buttons .btn-primary:hover { background: rgba(124,58,237,0.35); }
+        .hero-buttons .btn-secondary {
+            display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.75rem; border-radius: 0.5rem;
+            background: linear-gradient(135deg, rgba(139,13,131,0.4), rgba(13,44,161,0.4)); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08); color: #fff; font-weight: 500; font-size: 0.95rem; transition: opacity 0.2s;
+        }
+        .hero-buttons .btn-secondary:hover { opacity: 0.85; }
+
+        .hero-image { margin-top: 2rem; display: flex; justify-content: center; }
+        .hero-image img { width: 100%; max-width: 360px; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.06); }
+
+        @media (min-width: 768px) {
+            .hero .hero-flex { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+            .hero-image { margin-top: 0; justify-content: flex-end; }
+        }
+
+        /* REVEAL */
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* SECTIONS */
+        section { padding: 5rem 1.5rem; }
+        @media (min-width: 768px) { section { padding: 6rem 1.5rem; } }
+        .section-header { text-align: center; margin-bottom: 3.5rem; }
+        .section-label { font-size: 0.75rem; font-weight: 600; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.12em; display: block; margin-bottom: 0.75rem; }
+        .section-title { font-size: 2rem; font-weight: 700; color: #fff; line-height: 1.2; }
+        @media (min-width: 768px) { .section-title { font-size: 2.8rem; } }
+
+        /* SKILLS */
+        #skills { background: #000; }
+        .skills-grid { display: grid; gap: 1.5rem; }
+        @media (min-width: 640px) { .skills-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .skills-grid { grid-template-columns: repeat(3, 1fr); } }
+        .skill-card {
+            padding: 2rem; border-radius: 0.75rem;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            text-align: center; transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .skill-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(124,58,237,0.1); }
+        .skill-icon { width: 52px; height: 52px; border-radius: 0.75rem; background: rgba(124,58,237,0.12); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.3rem; }
+        .skill-card h3 { font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+        .skill-card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+        /* EXPERIENCE */
+        #experience { background: linear-gradient(to bottom, #000, rgba(124,58,237,0.03)); }
+        .exp-grid { display: grid; gap: 1rem; }
+        @media (min-width: 640px) { .exp-grid { grid-template-columns: repeat(2, 1fr); } }
+        .exp-card {
+            padding: 1.5rem; border-radius: 0.75rem;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .exp-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(124,58,237,0.1); }
+        .exp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
+        .exp-company { font-weight: 600; color: #fff; font-size: 1rem; }
+        .exp-visits { font-size: 0.7rem; font-weight: 500; color: rgba(167,139,250,0.7); background: rgba(124,58,237,0.1); padding: 0.2rem 0.6rem; border-radius: 999px; }
+        .exp-role { font-size: 0.8rem; color: rgba(167,139,250,0.6); margin-bottom: 0.6rem; }
+        .exp-desc { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
+        .exp-link { display: inline-block; margin-top: 0.6rem; font-size: 0.78rem; color: rgba(167,139,250,0.6); transition: color 0.2s; }
+        .exp-link:hover { color: #a78bfa; }
+
+        /* PORTFOLIO */
+        #portfolio { background: #000; }
+        .portfolio-grid { display: grid; gap: 1.25rem; }
+        @media (min-width: 640px) { .portfolio-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .portfolio-grid { grid-template-columns: repeat(3, 1fr); } }
+        .portfolio-card {
+            border-radius: 0.75rem; overflow: hidden;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .portfolio-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(124,58,237,0.12); }
+        .portfolio-card img { width: 100%; height: 170px; object-fit: cover; display: block; }
+        .portfolio-card-body { padding: 1rem 1.25rem 1.25rem; }
+        .portfolio-card-body h4 { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem; }
+        .portfolio-card-body p { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+        /* VIDEOS */
+        #videos { background: linear-gradient(to bottom, #000, rgba(124,58,237,0.03)); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+        .videos-grid { display: grid; gap: 1.25rem; }
+        @media (min-width: 640px) { .videos-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .videos-grid { grid-template-columns: repeat(3, 1fr); } }
+        .video-card {
+            border-radius: 0.75rem; overflow: hidden;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            transition: transform 0.25s ease;
+        }
+        .video-card:hover { transform: translateY(-3px); }
+        .video-wrapper { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
+        .video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+        .video-card-body { padding: 0.85rem 1rem; }
+        .video-card-body h4 { font-size: 0.9rem; font-weight: 600; color: #fff; margin-bottom: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .video-card-body span { font-size: 0.75rem; color: rgba(255,255,255,0.35); }
+
+        /* CONTACT */
+        #contact { background: #000; }
+        .contact-sub { text-align: center; font-size: 1rem; color: rgba(255,255,255,0.5); margin-bottom: 3rem; }
+        .contact-grid { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+        .contact-card {
+            padding: 1.5rem 2rem; border-radius: 0.75rem; cursor: pointer; min-width: 200px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            text-align: center; transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .contact-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(124,58,237,0.1); }
+        .contact-card-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
+        .contact-card-label { font-size: 0.65rem; font-weight: 500; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+        .contact-card-value { font-size: 1rem; font-weight: 600; color: #fff; }
+        .contact-card-copy { font-size: 0.72rem; color: rgba(167,139,250,0.5); margin-top: 0.5rem; }
+        .discord-box {
+            max-width: 500px; margin: 0 auto; padding: 2.5rem; border-radius: 0.75rem; text-align: center;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+        }
+        .discord-box h3 { font-size: 1.15rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+        .discord-box p { font-size: 0.85rem; color: rgba(255,255,255,0.45); margin-bottom: 1.5rem; }
+        .btn-discord {
+            display: inline-flex; padding: 0.7rem 2rem; border-radius: 0.5rem;
+            background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff;
+            font-weight: 500; font-size: 0.9rem; transition: opacity 0.2s;
+        }
+        .btn-discord:hover { opacity: 0.9; }
+
+        /* SETTINGS MODAL */
+        .settings-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6); width: 40px; height: 40px; border-radius: 0.5rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; transition: all 0.2s;
+        }
+        .settings-btn:hover { border-color: rgba(124,58,237,0.4); color: #a78bfa; }
+
+        .settings-modal {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; padding: 1.5rem;
+        }
+        .settings-modal.open { display: flex; }
+        .settings-panel {
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0.75rem; padding: 2rem; max-width: 500px; width: 100%;
+            max-height: 85vh; overflow-y: auto;
+        }
+        .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; }
+        .settings-header h2 { font-size: 1.2rem; font-weight: 600; color: #fff; }
+        .close-settings { background: none; border: none; color: rgba(255,255,255,0.4); font-size: 1.3rem; cursor: pointer; transition: color 0.2s; }
+        .close-settings:hover { color: #fff; }
+        .settings-group { margin-bottom: 1.5rem; }
+        .settings-label { display: block; font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 0.35rem; }
+        .settings-desc { font-size: 0.72rem; color: rgba(255,255,255,0.35); margin-bottom: 0.6rem; }
+        .color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
+        .color-opt {
+            width: 100%; padding: 0.6rem; border-radius: 0.5rem; cursor: pointer;
+            border: 2px solid transparent; transition: border-color 0.2s;
+        }
+        .color-opt:hover { border-color: rgba(255,255,255,0.2); }
+        .color-opt.active { border-color: #7c3aed; box-shadow: 0 0 8px rgba(124,58,237,0.4); }
+        .settings-group input, .settings-group select {
+            width: 100%; padding: 0.55rem 0.8rem; border-radius: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+            font-size: 0.82rem; color: #fff; outline: none; font-family: inherit;
+        }
+        .settings-group input:focus, .settings-group select:focus { border-color: #7c3aed; }
+        .settings-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.08); }
+        .settings-actions button { flex: 1; padding: 0.6rem; border-radius: 0.5rem; font-weight: 500; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-save { background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; border-color: transparent; }
+        .btn-save:hover { opacity: 0.9; }
+        .btn-reset { background: transparent; color: rgba(255,255,255,0.6); }
+        .btn-reset:hover { border-color: rgba(124,58,237,0.4); color: #a78bfa; }
+
+        .toggle-row { display: flex; align-items: center; gap: 0.75rem; }
+        .toggle-switch {
+            width: 44px; height: 24px; border-radius: 12px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer; position: relative; transition: background 0.3s;
+        }
+        .toggle-switch.active { background: #7c3aed; border-color: #7c3aed; }
+        .toggle-switch::after {
+            content: ''; position: absolute; width: 20px; height: 20px;
+            background: #fff; border-radius: 10px; top: 2px; left: 2px; transition: left 0.3s;
+        }
+        .toggle-switch.active::after { left: 22px; }
+        .toggle-label { font-size: 0.82rem; color: rgba(255,255,255,0.6); }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(60px);
+            background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff;
+            padding: 0.55rem 1.25rem; border-radius: 0.5rem; font-size: 0.82rem; font-weight: 500;
+            opacity: 0; transition: all 0.3s; z-index: 9999; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* FOOTER */
+        footer { border-top: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; }
+        .footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 0.5rem; text-align: center; }
+        @media (min-width: 640px) { .footer-inner { grid-template-columns: 1fr auto 1fr; align-items: center; } .footer-inner .brand { text-align: left; } .footer-inner .copy { text-align: right; } }
+        footer .brand { font-weight: 600; color: rgba(255,255,255,0.6); font-size: 0.85rem; }
+        footer .copy { font-size: 0.75rem; color: rgba(255,255,255,0.25); }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <span>VyTaxian</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#videos">Videos</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <button class="nav-cta" onclick="openSettings()">Settings</button>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- SETTINGS MODAL -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <button class="close-settings" onclick="closeSettings()">&#10005;</button>
+            </div>
+
+            <div class="settings-group">
+                <label class="settings-label">Accent Color</label>
+                <p class="settings-desc">Choose your portfolio's primary accent color</p>
+                <div class="color-grid" id="colorOptions">
+                    <div class="color-opt active" style="background:#7c3aed" onclick="changeAccent('#7c3aed', this)" title="Purple"></div>
+                    <div class="color-opt" style="background:#22d3ee" onclick="changeAccent('#22d3ee', this)" title="Cyan"></div>
+                    <div class="color-opt" style="background:#ec4899" onclick="changeAccent('#ec4899', this)" title="Pink"></div>
+                    <div class="color-opt" style="background:#10b981" onclick="changeAccent('#10b981', this)" title="Green"></div>
+                    <div class="color-opt" style="background:#f59e0b" onclick="changeAccent('#f59e0b', this)" title="Amber"></div>
+                    <div class="color-opt" style="background:#ef4444" onclick="changeAccent('#ef4444', this)" title="Red"></div>
+                    <div class="color-opt" style="background:#8b5cf6" onclick="changeAccent('#8b5cf6', this)" title="Violet"></div>
+                    <div class="color-opt" style="background:#06b6d4" onclick="changeAccent('#06b6d4', this)" title="Sky"></div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <label class="settings-label">Display Name</label>
+                <p class="settings-desc">Update how your name appears on the portfolio</p>
+                <input type="text" id="displayName" value="VyTaxian">
+            </div>
+
+            <div class="settings-group">
+                <label class="settings-label">Hero Subtitle</label>
+                <p class="settings-desc">Customize your professional tagline</p>
+                <input type="text" id="heroDesc" value="Programming, UI and VFX developer with over 373.6 Million visits+ contributed to and 15+ commissions completed.">
+            </div>
+
+            <div class="settings-group">
+                <label class="settings-label">Animations</label>
+                <p class="settings-desc">Enable or disable hover animations</p>
+                <div class="toggle-row">
+                    <div class="toggle-switch active" id="animToggle" onclick="toggleAnim()"></div>
+                    <span class="toggle-label" id="animStatus">Enabled</span>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <label class="settings-label">Discord Username</label>
+                <p class="settings-desc">Update your Discord contact info</p>
+                <input type="text" id="discordUsername" value="vy_tax">
+            </div>
+
+            <div class="settings-group">
+                <label class="settings-label">Roblox Username</label>
+                <p class="settings-desc">Update your Roblox profile name</p>
+                <input type="text" id="robloxUsername" value="dffrffffdfg">
+            </div>
+
+            <div class="settings-actions">
+                <button class="btn-save" onclick="saveSettings()">Save Changes</button>
+                <button class="btn-reset" onclick="resetSettings()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-bg-img"><img src="https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/b/5/d/b5df22212253eda5f0cebe857cc84dd9a874a478.jpeg" alt="Background" /></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-flex">
+                <div>
+                    <div class="hero-label reveal">Developer</div>
+                    <h1 class="reveal" id="heroName">VyTaxian</h1>
+                    <div class="hero-username reveal">dffrffffdfg</div>
+                    <p class="reveal" id="heroDescText">Programming, UI and VFX developer with over 373.6 Million visits+ contributed to and 15+ commissions completed.</p>
+                    <div class="hero-tags reveal">
+                        <span class="tag">Scripting</span>
+                        <span class="tag">UI Design</span>
+                        <span class="tag">VFX</span>
+                    </div>
+                    <div class="hero-stats reveal">
+                        <div><div class="stat-value">373.6M+</div><div class="stat-label">Visits Contributed</div></div>
+                        <div><div class="stat-value">15+</div><div class="stat-label">Commissions</div></div>
+                        <div><div class="stat-value" style="color:#4ade80;">&#9679;</div><div class="stat-label">Available</div></div>
+                    </div>
+                    <div class="hero-buttons reveal">
+                        <a href="#portfolio" class="btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                            View Projects
+                        </a>
+                        <a href="#contact" class="btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            Contact Me
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-image reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-f4cfa496-fde1-4e65-886a-aab1f9fb12be&w=3840&q=75" alt="VyTaxian Avatar">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section id="skills">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header">
+                <span class="section-label reveal">Expertise</span>
+                <h2 class="section-title reveal">Skills & Capabilities</h2>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-card reveal">
+                    <div class="skill-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="12" rx="2"/><path d="M9 8h6"/><path d="M12 12v4"/></svg></div>
+                    <h3>LuaU Scripting</h3>
+                    <p>Expert in LuaU scripting for Roblox game development with extensive framework experience, creating complex game mechanics and systems.</p>
+                </div>
+                <div class="skill-card reveal">
+                    <div class="skill-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8a2 2 0 0 1-2 2h-2a2 2 0 0 1 0-4h2a2 2 0 0 1 2 2z"/><path d="M8 14a2 2 0 0 0 2 2h2a2 2 0 0 0 0-4h-2a2 2 0 0 0-2 2z"/></svg></div>
+                    <h3>UI Design</h3>
+                    <p>Crafting intuitive and visually appealing user interfaces that enhance player experience and engagement.</p>
+                </div>
+                <div class="skill-card reveal">
+                    <div class="skill-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 4 6 4 6s4-4 4-6a4 4 0 0 0-4-4z"/><path d="M8 14c-2 2-3 4-3 6h14c0-2-1-4-3-6"/></svg></div>
+                    <h3>VFX</h3>
+                    <p>Creating stunning visual effects that bring games to life and immerse players in rich, dynamic worlds.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="experience">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header">
+                <span class="section-label reveal">Background</span>
+                <h2 class="section-title reveal">Professional Experience</h2>
+            </div>
+            <div class="exp-grid">
+                <div class="exp-card reveal">
+                    <div class="exp-header">
+                        <div class="exp-company">Rich Studios</div>
+                        <span class="exp-visits">4M visits</span>
+                    </div>
+                    <div class="exp-role">Chief Developer</div>
+                    <p class="exp-desc">Spearheading development initiatives and architecting cutting-edge gameplay systems for a premier Roblox development studio.</p>
+                </div>
+                <div class="exp-card reveal">
+                    <div class="exp-header">
+                        <div class="exp-company">Playverse</div>
+                        <span class="exp-visits">340.9M visits</span>
+                    </div>
+                    <div class="exp-role">Trial Developer</div>
+                    <p class="exp-desc">Participated in trial development phase, contributing to systems and features for one of the largest Roblox game studios.</p>
+                    <a href="https://www.playverse.cc/" class="exp-link" target="_blank">Live Tracker &#8599;</a>
+                </div>
+                <div class="exp-card reveal">
+                    <div class="exp-header">
+                        <div class="exp-company">Interactive Studios</div>
+                        <span class="exp-visits">20M visits</span>
+                    </div>
+                    <div class="exp-role">Senior Developer - Scripting</div>
+                    <p class="exp-desc">Engineered sophisticated scripting solutions and core gameplay mechanics for a top-tier Roblox studio.</p>
+                    <a href="https://coolinteractivestudios.onrender.com/" class="exp-link" target="_blank">Live Tracker &#8599;</a>
+                </div>
+                <div class="exp-card reveal">
+                    <div class="exp-header">
+                        <div class="exp-company">Hargrave</div>
+                        <span class="exp-visits">4M visits</span>
+                    </div>
+                    <div class="exp-role">Development Intern</div>
+                    <p class="exp-desc">Contributed to feature development and performance optimization while gaining expertise in large-scale Roblox game production.</p>
+                </div>
+                <div class="exp-card reveal">
+                    <div class="exp-header">
+                        <div class="exp-company">RGGRP</div>
+                        <span class="exp-visits">1.2M visits</span>
+                    </div>
+                    <div class="exp-role">Chief Developer</div>
+                    <p class="exp-desc">Led development team and architected core game systems for this highly successful roleplay game.</p>
+                </div>
+                <div class="exp-card reveal">
+                    <div class="exp-header">
+                        <div class="exp-company">GGRP</div>
+                        <span class="exp-visits">1.0M visits</span>
+                    </div>
+                    <div class="exp-role">Chief Of Development</div>
+                    <p class="exp-desc">Oversaw all development operations and implemented key gameplay features and mechanics.</p>
+                </div>
+                <div class="exp-card reveal">
+                    <div class="exp-header">
+                        <div class="exp-company">BAA</div>
+                        <span class="exp-visits">2.5M visits</span>
+                    </div>
+                    <div class="exp-role">Development Intern</div>
+                    <p class="exp-desc">Contributed to game development and gained valuable experience in large-scale Roblox projects.</p>
+                </div>
+                <div class="exp-card reveal">
+                    <div class="exp-header">
+                        <div class="exp-company">Freelance Commissions</div>
+                        <span class="exp-visits">15+ done</span>
+                    </div>
+                    <div class="exp-role">Developer</div>
+                    <p class="exp-desc">Successfully completed 15+ custom development commissions for various clients, delivering high-quality Roblox game systems and features.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIDEOS -->
+    <section id="videos">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label reveal">Showcase</span>
+                <h2 class="section-title reveal">Video Demos</h2>
+            </div>
+            <div class="videos-grid">
+                <div class="video-card reveal">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/5tkJdMBBr1c?rel=0" title="Starfighter System" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-card-body">
+                        <h4>Starfighter System</h4>
+                    </div>
+                </div>
+                <div class="video-card reveal">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/vIA5lJ0K-oU?rel=0" title="UI Scripting" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-card-body">
+                        <h4>UI Scripting</h4>
+                    </div>
+                </div>
+                <div class="video-card reveal">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/MX3fRWusoGw?rel=0" title="VFX" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-card-body">
+                        <h4>VFX</h4>
+                    </div>
+                </div>
+                <div class="video-card reveal">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/lVMmImZRyzk?rel=0" title="VFX" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-card-body">
+                        <h4>VFX</h4>
+                    </div>
+                </div>
+                <div class="video-card reveal">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/Y4CDYEH0veA?rel=0" title="Re-worked BaE" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-card-body">
+                        <h4>Re-worked BaE</h4>
+                    </div>
+                </div>
+                <div class="video-card reveal">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/hnD-xSONpb4?rel=0" title="Pizza" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-card-body">
+                        <h4>Pizza</h4>
+                    </div>
+                </div>
+                <div class="video-card reveal">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/xCR_D5WhduI?rel=0" title="Anime Timestop" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-card-body">
+                        <h4>Anime Timestop</h4>
+                    </div>
+                </div>
+                <div class="video-card reveal">
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/_Ri1MBk24kk?rel=0" title="Tazer" loading="lazy" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-card-body">
+                        <h4>Tazer</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section id="portfolio">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header">
+                <span class="section-label reveal">Showcase</span>
+                <h2 class="section-title reveal">Portfolio</h2>
+            </div>
+            <div class="portfolio-grid">
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-95750078-eefe-49f6-b2dd-034b87e3578d&w=3840&q=75" alt="Shop Interface" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Shop Interface</h4>
+                        <p>VIP Gamepass shop system with intuitive purchasing flow and visual feedback.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-b63518fd-5286-4a39-894f-eca52648ec49&w=3840&q=75" alt="Daily Rewards System" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Daily Rewards System</h4>
+                        <p>Engaging daily login rewards system with progressive incentives.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-0d67e113-936c-421d-b3ee-f531614f4348&w=3840&q=75" alt="Rebirth System" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Rebirth System</h4>
+                        <p>Player progression system with rebirth mechanics and stat multipliers.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-c2ed4760-d0ba-4b71-ade4-500fac43fd86&w=3840&q=75" alt="Signal Class Implementation" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Signal Class</h4>
+                        <p>Custom Signal class for event handling and connection management in Lua.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-ca54f90f-7857-4a23-a8d7-3d30718bfada&w=3840&q=75" alt="Wand Magic System" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Wand Magic System</h4>
+                        <p>Tool activation system with spell casting functionality and player interaction.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-59b32069-dde3-4a96-a02e-c61b53c9a54d&w=3840&q=75" alt="Spell System Logic" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Spell System Logic</h4>
+                        <p>Advanced spell system with VFX integration and cooldown management.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-e3069884-5cce-4057-bf0e-4e3575036a6d&w=3840&q=75" alt="Race Manager" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Race Manager</h4>
+                        <p>Event-based race management system with ReplicatedStorage and DataManager integration.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-d21296ca-b5d4-4965-8180-f55ce24fa520&w=3840&q=75" alt="Data Manager" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Data Manager</h4>
+                        <p>DataStore service integration with player data persistence and default value handling.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-d8631a4e-956d-4986-8ba5-d007bd92f606&w=3840&q=75" alt="Event Signal System" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Event Signal System</h4>
+                        <p>Robust signal system with connection management, type safety, and node-based architecture.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-8854db5b-82f9-4aaa-82f1-c587e9e792f1&w=3840&q=75" alt="Treap Map Implementation" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Treap Map</h4>
+                        <p>Persistent treap-based map data structure with balanced tree operations.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-73dc756f-a771-419e-b40a-619229963ecc&w=3840&q=75" alt="Pratt Parser" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>Pratt Parser</h4>
+                        <p>Expression parser using Pratt parsing algorithm with lexical analysis and tokenization.</p>
+                    </div>
+                </div>
+                <div class="portfolio-card reveal">
+                    <img src="https://taxs-portfolio.replosites.com/_next/image?url=https%3A%2F%2Fassets.replocdn.com%2Fprojects%2Ff83a9fc2-3990-4504-b0b1-b2b26a5ccdc6%2Fchat-assets-fca5a926-ba32-4e26-8fcf-adfe39b6a95a&w=3840&q=75" alt="LRU Cache" loading="lazy">
+                    <div class="portfolio-card-body">
+                        <h4>LRU Cache</h4>
+                        <p>Least Recently Used cache implementation with efficient node operations and capacity management.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header">
+                <span class="section-label reveal">Connect</span>
+                <h2 class="section-title reveal">Get In Touch</h2>
+            </div>
+            <p class="contact-sub reveal">Available for commissions and collaborations</p>
+            <div class="contact-grid reveal">
+                <div class="contact-card" onclick="copyInfo('discord')">
+                    <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                    <div class="contact-card-label">Discord</div>
+                    <div class="contact-card-value" id="discordDisplay">vy_tax</div>
+                    <div class="contact-card-copy">Click to copy</div>
+                </div>
+                <div class="contact-card" onclick="copyInfo('roblox')">
+                    <div class="contact-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="17" cy="10" r="1"/><circle cx="14" cy="13" r="1"/></svg></div>
+                    <div class="contact-card-label">Roblox</div>
+                    <div class="contact-card-value" id="robloxDisplay">dffrffffdfg</div>
+                    <div class="contact-card-copy">Click to copy</div>
+                </div>
+            </div>
+            <div class="discord-box reveal">
+                <h3>Interested in commissioning?</h3>
+                <p>Join my Discord server to discuss your project!</p>
+                <a href="https://discord.gg/NHxWqs5T" target="_blank" class="btn-discord">Join Discord Server</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; margin-top: -2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> VyTaxian</div>
+            <div class="copy">&copy; 2026 TAX_TAXER. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // NAVBAR
+        setTimeout(() => document.getElementById('navbar').classList.add('visible'), 300);
+
+        // SCROLL REVEAL
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        setTimeout(() => { document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el)); }, 200);
+
+        // SETTINGS
+        let currentAccent = '#7c3aed';
+
+        function openSettings() { document.getElementById('settingsModal').classList.add('open'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+
+        function changeAccent(color, el) {
+            currentAccent = color;
+            document.documentElement.style.setProperty('--accent', color);
+            document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('active'));
+            el.classList.add('active');
+            localStorage.setItem('vyAccent', color);
+        }
+
+        function toggleAnim() {
+            const t = document.getElementById('animToggle');
+            const s = document.getElementById('animStatus');
+            t.classList.toggle('active');
+            s.textContent = t.classList.contains('active') ? 'Enabled' : 'Disabled';
+            if (!t.classList.contains('active')) {
+                document.querySelectorAll('.skill-card, .exp-card, .portfolio-card, .contact-card').forEach(el => {
+                    el.style.transition = 'none';
+                });
+            } else {
+                document.querySelectorAll('.skill-card, .exp-card, .portfolio-card, .contact-card').forEach(el => {
+                    el.style.transition = '';
+                });
+            }
+            localStorage.setItem('vyAnim', t.classList.contains('active') ? '1' : '0');
+        }
+
+        function saveSettings() {
+            const name = document.getElementById('displayName').value;
+            const desc = document.getElementById('heroDesc').value;
+            const disc = document.getElementById('discordUsername').value;
+            const rob = document.getElementById('robloxUsername').value;
+
+            document.getElementById('heroName').textContent = name;
+            document.getElementById('heroDescText').textContent = desc;
+            document.getElementById('discordDisplay').textContent = disc;
+            document.getElementById('robloxDisplay').textContent = rob;
+
+            localStorage.setItem('vyName', name);
+            localStorage.setItem('vyDesc', desc);
+            localStorage.setItem('vyDiscord', disc);
+            localStorage.setItem('vyRoblox', rob);
+
+            showToast('Settings saved!');
+            closeSettings();
+        }
+
+        function resetSettings() {
+            if (confirm('Reset all settings to default?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function copyInfo(type) {
+            const id = type === 'discord' ? 'discordDisplay' : 'robloxDisplay';
+            const text = document.getElementById(id).textContent;
+            const msg = type === 'discord' ? 'Discord username copied!' : 'Roblox username copied!';
+            navigator.clipboard.writeText(text).catch(() => {});
+            showToast(msg);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        // LOAD SAVED SETTINGS
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedAccent = localStorage.getItem('vyAccent') || '#7c3aed';
+            const animOn = localStorage.getItem('vyAnim') !== '0';
+
+            const opt = document.querySelector(`.color-opt[style*="background: ${savedAccent}"]`) || document.querySelector('.color-opt');
+            if (opt) changeAccent(savedAccent, opt);
+
+            if (!animOn) {
+                document.getElementById('animToggle').classList.remove('active');
+                document.getElementById('animStatus').textContent = 'Disabled';
+            }
+
+            document.getElementById('displayName').value = localStorage.getItem('vyName') || 'VyTaxian';
+            document.getElementById('heroDesc').value = localStorage.getItem('vyDesc') || 'Programming, UI and VFX developer with over 373.6 Million visits+ contributed to and 15+ commissions completed.';
+            document.getElementById('discordUsername').value = localStorage.getItem('vyDiscord') || 'vy_tax';
+            document.getElementById('robloxUsername').value = localStorage.getItem('vyRoblox') || 'dffrffffdfg';
+
+            document.getElementById('heroName').textContent = localStorage.getItem('vyName') || 'VyTaxian';
+            document.getElementById('heroDescText').textContent = localStorage.getItem('vyDesc') || 'Programming, UI and VFX developer with over 373.6 Million visits+ contributed to and 15+ commissions completed.';
+            document.getElementById('discordDisplay').textContent = localStorage.getItem('vyDiscord') || 'vy_tax';
+            document.getElementById('robloxDisplay').textContent = localStorage.getItem('vyRoblox') || 'dffrffffdfg';
+        });
+
+        // CLOSE MODAL ON BACKDROP CLICK
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('settingsModal');
+            if (e.target === modal) closeSettings();
+        });
+
+        // MOBILE MENU
+        document.querySelector('.menu-toggle').addEventListener('click', () => {
+            const links = document.querySelector('.nav-links');
+            const cta = document.querySelector('.nav-cta');
+            const isOpen = links.style.display === 'flex';
+            links.style.display = isOpen ? 'none' : 'flex';
+            links.style.flexDirection = 'column';
+            links.style.position = 'absolute';
+            links.style.top = '72px';
+            links.style.left = '0';
+            links.style.right = '0';
+            links.style.background = 'rgba(0,0,0,0.95)';
+            links.style.backdropFilter = 'blur(16px)';
+            links.style.padding = '1.5rem';
+            links.style.gap = '1.25rem';
+            links.style.alignItems = 'flex-start';
+            if (!isOpen) { links.style.display = 'flex'; if (cta) cta.style.display = 'none'; }
+            if (isOpen && cta) cta.style.display = 'inline-flex';
+        });
+    </script>
+</body>
+</html>

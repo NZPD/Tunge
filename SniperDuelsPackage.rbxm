@@ -1,0 +1,1268 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+	<External>null</External>
+	<External>nil</External>
+	<Item class="Folder" referent="RBX0">
+		<Properties>
+			<string name="Name">SniperDuelsPackage</string>
+		</Properties>
+		<Item class="ModuleScript" referent="RBX1">
+			<Properties>
+				<string name="Name">WeaponConfig</string>
+				<string name="Source"><![CDATA[--!strict
+
+local WeaponConfig = {}
+
+WeaponConfig.Weapons = {
+	DefaultSniper = {
+		Name = "R700",
+		DisplayName = "R-700 Sniper",
+		BaseDamage = 100,
+		HeadshotMultiplier = 2.5,
+		DamageFalloffStart = 200,
+		DamageFalloffEnd = 500,
+		MinDamage = 35,
+		BulletSpeed = 1500,
+		BulletDrop = 0.2,
+		MaxDistance = 1000,
+		MagazineSize = 5,
+		TotalAmmo = 25,
+		ReloadTime = 2.5,
+		ReloadType = "SingleRound",
+		SingleReloadTime = 0.8,
+		FireRate = 1.2,
+		ChamberTime = 0.5,
+		RecoilVertical = 15,
+		RecoilHorizontal = 5,
+		RecoilResetTime = 0.8,
+		RecoilRecoverySpeed = 8,
+		SpreadPerShot = 0.5,
+		MaxSpread = 8,
+		SpreadRecoveryRate = 6,
+		ZoomFOV = 20,
+		ZoomInTime = 0.3,
+		ZoomOutTime = 0.15,
+		HasScopeGlint = true,
+		ScopeGlintDistance = 300,
+		ADSFOV = 40,
+		ADSInTime = 0.2,
+		ADSOutTime = 0.1,
+		SwayAmount = 0.1,
+		SwaySmoothing = 5,
+		BreatheSwayMultiplier = 0.3,
+		BreatheHoldDuration = 4,
+		BreatheCooldown = 6,
+		MuzzleFlashDuration = 0.08,
+		Sounds = {
+			Fire = "rbxassetid://9120385264",
+			ReloadStart = "rbxassetid://9120385632",
+			ReloadEnd = "rbxassetid://9120385789",
+			Chamber = "rbxassetid://9120385943",
+			Hitmarker = "rbxassetid://9120386105",
+			Empty = "rbxassetid://9120386278",
+		},
+	},
+}
+
+WeaponConfig.Hitmarker = {
+	BaseColor = Color3.fromRGB(255, 255, 255),
+	KillColor = Color3.fromRGB(255, 50, 50),
+	Size = 20,
+	Duration = 0.3,
+	KillDuration = 0.6,
+	SpreadAngle = 45,
+}
+
+WeaponConfig.Crosshair = {
+	DefaultColor = Color3.fromRGB(255, 255, 255),
+	DamageColor = Color3.fromRGB(255, 50, 50),
+	Size = 5,
+	Gap = 10,
+	Thickness = 2,
+	DotEnabled = true,
+	DotSize = 3,
+	SpreadEnabled = true,
+}
+
+WeaponConfig.KillFeed = {
+	MaxMessages = 6,
+	Duration = 8,
+	FadeTime = 1,
+}
+
+WeaponConfig.RespawnTime = 5
+WeaponConfig.FriendlyFire = false
+
+return WeaponConfig]]></string>
+				<bool name="Disabled">false</bool>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBX2">
+			<Properties>
+				<string name="Name">RemoteEvents</string>
+				<string name="Source"><![CDATA[--!strict
+
+local RemoteEvents = Instance.new("Folder")
+RemoteEvents.Name = "SniperDuelsRemotes"
+
+local FireBullet = Instance.new("RemoteEvent")
+FireBullet.Name = "FireBullet"
+FireBullet.Parent = RemoteEvents
+
+local BulletHit = Instance.new("RemoteEvent")
+BulletHit.Name = "BulletHit"
+BulletHit.Parent = RemoteEvents
+
+local PlayerDied = Instance.new("RemoteEvent")
+PlayerDied.Name = "PlayerDied"
+PlayerDied.Parent = RemoteEvents
+
+local MatchStateChanged = Instance.new("RemoteEvent")
+MatchStateChanged.Name = "MatchStateChanged"
+MatchStateChanged.Parent = RemoteEvents
+
+local ScopeChanged = Instance.new("RemoteEvent")
+ScopeChanged.Name = "ScopeChanged"
+ScopeChanged.Parent = RemoteEvents
+
+local ReloadStarted = Instance.new("RemoteEvent")
+ReloadStarted.Name = "ReloadStarted"
+ReloadStarted.Parent = RemoteEvents
+
+local WeaponEquipped = Instance.new("RemoteEvent")
+WeaponEquipped.Name = "WeaponEquipped"
+WeaponEquipped.Parent = RemoteEvents
+
+local ClientReady = Instance.new("RemoteEvent")
+ClientReady.Name = "ClientReady"
+ClientReady.Parent = RemoteEvents
+
+local RequestRespawn = Instance.new("RemoteEvent")
+RequestRespawn.Name = "RequestRespawn"
+RequestRespawn.Parent = RemoteEvents
+
+RemoteEvents.Parent = script.Parent
+
+return RemoteEvents]]></string>
+				<bool name="Disabled">false</bool>
+			</Properties>
+		</Item>
+		<Item class="Folder" referent="RBX3">
+			<Properties>
+				<string name="Name">Server</string>
+			</Properties>
+			<Item class="Script" referent="RBX4">
+				<Properties>
+					<string name="Name">SniperDuelsMain</string>
+					<string name="Source"><![CDATA[--!strict
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local MatchManager = require(script.Parent.MatchManager)
+local GunHandler = require(script.Parent.GunHandler)
+
+local function onServerStart()
+	MatchManager:StartMatch()
+end
+
+game:GetService("Players").PlayerAdded:Connect(function(player)
+	player:WaitForChild("PlayerGui")
+	
+	if MatchManager.CurrentMatch ~= nil then
+		MatchManager:AddPlayerToMatch(player)
+	end
+end)
+
+local remotesFolder = ReplicatedStorage:FindFirstChild("SniperDuelsRemotes")
+if remotesFolder then
+	local remote = remotesFolder:FindFirstChild("ClientReady")
+	if remote then
+		remote.OnServerEvent:Connect(function(player)
+			if MatchManager:IsPlayerInMatch(player) then
+				MatchManager:SpawnPlayer(player)
+			end
+		end)
+	end
+end
+
+onServerStart()]]></string>
+					<bool name="Disabled">false</bool>
+					<token name="RunContext">3</token>
+				</Properties>
+			</Item>
+			<Item class="ModuleScript" referent="RBX5">
+				<Properties>
+					<string name="Name">MatchManager</string>
+					<string name="Source"><![CDATA[--!strict
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Debris = game:GetService("Debris")
+
+local WeaponConfig = require(ReplicatedStorage:FindFirstChild("WeaponConfig"))
+local RemoteEvents = require(ReplicatedStorage:FindFirstChild("RemoteEvents"))
+
+local MatchManager = {}
+MatchManager.CurrentMatch = nil
+MatchManager.PlayerStates = {}
+
+local matchState = {
+	WaitingForPlayers = "WaitingForPlayers",
+	InProgress = "InProgress",
+	Ended = "Ended",
+}
+
+local playerMatchData = {}
+
+function MatchManager:GetPlayerData(player: Player)
+	return playerMatchData[player]
+end
+
+function MatchManager:IsPlayerInMatch(player: Player)
+	local data = playerMatchData[player]
+	return data ~= nil and data.InMatch == true
+end
+
+function MatchManager:StartMatch()
+	if MatchManager.CurrentMatch ~= nil then
+		return
+	end
+	
+	local matchId = tick()
+	MatchManager.CurrentMatch = matchId
+	
+	RemoteEvents.MatchStateChanged:FireAllClients("InProgress", matchId)
+	
+	task.wait(1)
+	
+	for _, player in ipairs(Players:GetPlayers()) do
+		if playerMatchData[player] == nil then
+			self:AddPlayerToMatch(player)
+		else
+			local data = playerMatchData[player]
+			data.InMatch = true
+			data.Deaths = 0
+			data.Kills = 0
+			self:SpawnPlayer(player)
+		end
+	end
+	
+	Players.PlayerAdded:Connect(function(player)
+		if MatchManager.CurrentMatch == matchId then
+			self:AddPlayerToMatch(player)
+		end
+	end)
+end
+
+function MatchManager:AddPlayerToMatch(player: Player)
+	local data = {
+		InMatch = true,
+		Kills = 0,
+		Deaths = 0,
+		Team = "None",
+		CurrentWeapon = "DefaultSniper",
+		RespawnTimer = nil,
+	}
+	playerMatchData[player] = data
+	self:SpawnPlayer(player)
+end
+
+function MatchManager:SpawnPlayer(player: Player)
+	local data = playerMatchData[player]
+	if data == nil or not data.InMatch then
+		return
+	end
+	
+	if player.Character and player.Character:FindFirstChild("Humanoid") then
+		player.Character:BreakJoints()
+	end
+	
+	task.wait(0.5)
+	
+	local spawnLocations = workspace:FindFirstChild("SpawnLocations")
+	local spawnPoint = nil
+	
+	if spawnLocations then
+		local children = spawnLocations:GetChildren()
+		if #children > 0 then
+			spawnPoint = children[math.random(1, #children)]
+		end
+	end
+	
+	local character = Instance.new("Model")
+	character.Name = player.Name
+	
+	local humanoid = Instance.new("Humanoid")
+	humanoid.Parent = character
+	
+	local rootPart = Instance.new("Part")
+	rootPart.Name = "HumanoidRootPart"
+	rootPart.Size = Vector3.new(2, 2, 1)
+	rootPart.Anchored = false
+	rootPart.CanCollide = false
+	rootPart.Parent = character
+	
+	local head = Instance.new("Part")
+	head.Name = "Head"
+	head.Size = Vector3.new(2, 1, 1)
+	head.Anchored = false
+	head.CanCollide = false
+	head.Parent = character
+	
+	local torso = Instance.new("Part")
+	torso.Name = "Torso"
+	torso.Size = Vector3.new(2, 2, 1)
+	torso.Anchored = false
+	torso.CanCollide = false
+	torso.Parent = character
+	
+	local humanoidRootPart = Instance.new("Weld")
+	humanoidRootPart.Name = "HumanoidRootPartWeld"
+	humanoidRootPart.Part0 = rootPart
+	humanoidRootPart.Part1 = torso
+	humanoidRootPart.Parent = rootPart
+	
+	if spawnPoint then
+		rootPart.CFrame = spawnPoint.CFrame + Vector3.new(0, 3, 0)
+	else
+		rootPart.CFrame = CFrame.new(0, 10, 0)
+	end
+	
+	local tool = Instance.new("Tool")
+	tool.Name = "Sniper"
+	tool.RequiresHandle = false
+	tool.CanBeDropped = false
+	tool.Parent = character
+	
+	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	character.Parent = workspace
+	
+	player.Character = character
+	
+	RemoteEvents.WeaponEquipped:FireClient(player, "DefaultSniper")
+end
+
+function MatchManager:OnPlayerDeath(killedPlayer: Player, killerPlayer: Player?, headshot: boolean)
+	local killedData = playerMatchData[killedPlayer]
+	if killedData == nil or not killedData.InMatch then
+		return
+	end
+	
+	killedData.Deaths += 1
+	
+	if killerPlayer then
+		local killerData = playerMatchData[killerPlayer]
+		if killerData then
+			local killScore = 1
+			if headshot then
+				killScore = 2
+			end
+			killerData.Kills += killScore
+		end
+		
+		local killMessage = killerPlayer.Name .. " killed " .. killedPlayer.Name
+		if headshot then
+			killMessage = killMessage .. " (HEADSHOT)"
+		end
+		
+		RemoteEvents.PlayerDied:FireAllClients(killMessage, killerPlayer.Name, killedPlayer.Name, headshot)
+	end
+	
+	if killedPlayer.Character then
+		killedPlayer.Character:BreakJoints()
+	end
+	
+	task.delay(WeaponConfig.RespawnTime, function()
+		if playerMatchData[killedPlayer] and playerMatchData[killedPlayer].InMatch then
+			self:SpawnPlayer(killedPlayer)
+		end
+	end)
+end
+
+function MatchManager:EndMatch()
+	if MatchManager.CurrentMatch == nil then
+		return
+	end
+	
+	MatchManager.CurrentMatch = nil
+	
+	RemoteEvents.MatchStateChanged:FireAllClients("Ended", nil)
+	
+	for player, data in pairs(playerMatchData) do
+		data.InMatch = false
+		if player.Character then
+			player.Character:BreakJoints()
+		end
+	end
+end
+
+function MatchManager:RemovePlayerFromMatch(player: Player)
+	local data = playerMatchData[player]
+	if data then
+		data.InMatch = false
+		if player.Character then
+			player.Character:BreakJoints()
+		end
+	end
+end
+
+Players.PlayerRemoving:Connect(function(player)
+	self:RemovePlayerFromMatch(player)
+	playerMatchData[player] = nil
+end)
+
+return MatchManager]]></string>
+				<bool name="Disabled">false</bool>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBX6">
+			<Properties>
+				<string name="Name">GunHandler</string>
+				<string name="Source"><![CDATA[--!strict
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Debris = game:GetService("Debris")
+local PhysicsService = game:GetService("PhysicsService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local WeaponConfig = require(ReplicatedStorage:FindFirstChild("WeaponConfig"))
+local RemoteEvents = require(ReplicatedStorage:FindFirstChild("RemoteEvents"))
+local MatchManager = require(script.Parent.MatchManager)
+
+local GunHandler = {}
+
+local bulletCache = {}
+local activeBullets = {}
+
+function GunHandler:FireWeapon(player: Player, weaponName: string, origin: Vector3, direction: Vector3)
+	local matchData = MatchManager:GetPlayerData(player)
+	if not matchData or not matchData.InMatch then
+		return
+	end
+	
+	local weaponConfig = WeaponConfig.Weapons[weaponName]
+	if not weaponConfig then
+		return
+	end
+	
+	local character = player.Character
+	if not character then
+		return
+	end
+	
+	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+	if not humanoidRootPart then
+		return
+	end
+	
+	local bulletSpeed = weaponConfig.BulletSpeed
+	local maxDistance = weaponConfig.MaxDistance
+	local bulletDrop = weaponConfig.BulletDrop
+	local baseDamage = weaponConfig.BaseDamage
+	
+	local hitResult, hitPosition, hitNormal = self:RaycastBullet(origin, direction, maxDistance, player)
+	
+	local targetPlayer = nil
+	local hitPart = nil
+	local headshot = false
+	
+	if hitResult then
+		hitPart = hitResult.Instance
+		if hitPart and hitPart.Parent then
+			local model = hitPart.Parent
+			if model:IsA("Model") then
+				for _, otherPlayer in ipairs(Players:GetPlayers()) do
+					if otherPlayer ~= player and otherPlayer.Character == model then
+						targetPlayer = otherPlayer
+						if hitPart.Name == "Head" then
+							headshot = true
+						end
+						break
+					end
+				end
+			end
+		end
+	end
+	
+	if targetPlayer then
+		local distance = (origin - hitPosition).Magnitude
+		local damage = self:CalculateDamage(baseDamage, distance, weaponConfig, headshot)
+		
+		local targetCharacter = targetPlayer.Character
+		if targetCharacter then
+			local humanoid = targetCharacter:FindFirstChild("Humanoid")
+			if humanoid then
+				humanoid:TakeDamage(damage)
+				RemoteEvents.BulletHit:FireClient(player, "Hit", targetPlayer.Name, damage, headshot)
+				RemoteEvents.BulletHit:FireClient(targetPlayer, "Damaged", damage, origin, direction)
+				
+				if humanoid.Health <= 0 then
+					MatchManager:OnPlayerDeath(targetPlayer, player, headshot)
+				end
+			end
+		end
+	else
+		RemoteEvents.BulletHit:FireClient(player, "Miss", hitPosition)
+	end
+	
+	self:CreateBulletTrail(origin, hitPosition or origin + direction * maxDistance)
+end
+
+function GunHandler:RaycastBullet(origin: Vector3, direction: Vector3, maxDist: number, shooter: Player)
+	local currentPos = origin
+	local currentDir = direction.Unit
+	local stepDistance = 50
+	local gravity = workspace.Gravity * 0.2
+	local steps = math.ceil(maxDist / stepDistance)
+	
+	for i = 1, steps do
+		local targetPos = currentPos + currentDir * stepDistance
+		local t = (i / steps)
+		targetPos = targetPos - Vector3.new(0, gravity * t * t * 0.5, 0)
+		
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Blacklist
+		local filter = {shooter.Character}
+		params.FilterDescendantsInstances = filter
+		
+		local result = workspace:Raycast(currentPos, targetPos - currentPos, params)
+		
+		if result then
+			return result, result.Position, result.Normal
+		end
+		
+		currentPos = targetPos
+		currentDir = (targetPos - origin).Unit
+	end
+	
+	local finalPos = currentPos + currentDir * stepDistance
+	finalPos = finalPos - Vector3.new(0, gravity * steps * steps * 0.5, 0)
+	
+	return nil, finalPos, Vector3.new(0, 1, 0)
+end
+
+function GunHandler:CalculateDamage(baseDamage: number, distance: number, config: any, headshot: boolean)
+	local falloffStart = config.DamageFalloffStart
+	local falloffEnd = config.DamageFalloffEnd
+	local minDamage = config.MinDamage
+	
+	local damageMultiplier = 1
+	
+	if distance > falloffStart then
+		local falloffRange = falloffEnd - falloffStart
+		if falloffRange > 0 then
+			local distancePastStart = math.max(0, distance - falloffStart)
+			local falloffFactor = math.min(1, distancePastStart / falloffRange)
+			damageMultiplier = 1 - (1 - (minDamage / baseDamage)) * falloffFactor
+		end
+	end
+	
+	local finalDamage = baseDamage * damageMultiplier
+	
+	if headshot then
+		finalDamage = finalDamage * config.HeadshotMultiplier
+	end
+	
+	return finalDamage
+end
+
+function GunHandler:CreateBulletTrail(origin: Vector3, hitPos: Vector3)
+	local trail = Instance.new("Part")
+	trail.Name = "BulletTrail"
+	trail.Size = Vector3.new(0.1, 0.1, (origin - hitPos).Magnitude)
+	trail.CFrame = CFrame.new(origin, hitPos) * CFrame.new(0, 0, -(origin - hitPos).Magnitude / 2)
+	trail.Anchored = true
+	trail.CanCollide = false
+	trail.Transparency = 0.5
+	trail.Material = Enum.Material.Neon
+	trail.Color = Color3.fromRGB(255, 255, 200)
+	trail.Parent = workspace
+	
+	local attachment0 = Instance.new("Attachment")
+	attachment0.Parent = trail
+	
+	local attachment1 = Instance.new("Attachment")
+	attachment1.Parent = trail
+	attachment1.Position = Vector3.new(0, 0, trail.Size.Z)
+	
+	local trailEffect = Instance.new("Trail")
+	trailEffect.Attachment0 = attachment0
+	trailEffect.Attachment1 = attachment1
+	trailEffect.Lifetime = 0.1
+	trailEffect.Transparency = NumberSequence.new(0.4, 1)
+	trailEffect.Color = ColorSequence.new(Color3.fromRGB(255, 255, 200))
+	trailEffect.Parent = trail
+	
+	Debris:AddItem(trail, 0.3)
+end
+
+RemoteEvents.FireBullet.OnServerEvent:Connect(function(player, weaponName, origin, direction)
+	GunHandler:FireWeapon(player, weaponName, origin, direction)
+end)
+
+return GunHandler]]></string>
+				<bool name="Disabled">false</bool>
+			</Properties>
+		</Item>
+	</Item>
+	<Item class="Folder" referent="RBX7">
+		<Properties>
+			<string name="Name">Client</string>
+		</Properties>
+		<Item class="LocalScript" referent="RBX8">
+			<Properties>
+				<string name="Name">SniperDuelsClient</string>
+				<string name="Source"><![CDATA[--!strict
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
+
+local RemoteEvents = require(ReplicatedStorage:FindFirstChild("RemoteEvents"))
+local WeaponConfig = require(ReplicatedStorage:FindFirstChild("WeaponConfig"))
+
+local function onClientStart()
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+	
+	local success, gunController = pcall(function()
+		return require(script.Parent.GunController)
+	end)
+	
+	if not success then
+		warn("Failed to load GunController")
+	end
+	
+	RemoteEvents.ClientReady:FireServer()
+	
+	task.wait(1)
+	
+	if gunController then
+		gunController:Initialize()
+	end
+	
+	UserInputService.MouseIconEnabled = false
+end
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "Loader"
+gui.ResetOnSpawn = false
+gui.Parent = player.PlayerGui
+
+local loadingLabel = Instance.new("TextLabel")
+loadingLabel.Size = UDim2.new(1, 0, 0, 50)
+loadingLabel.Position = UDim2.new(0, 0, 0.5, -25)
+loadingLabel.BackgroundTransparency = 1
+loadingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadingLabel.TextScaled = true
+loadingLabel.Font = Enum.Font.GothamBold
+loadingLabel.Text = "Waiting for match..."
+loadingLabel.Parent = gui
+
+task.delay(1, function()
+	onClientStart()
+	gui:Destroy()
+end)]]></string>
+				<bool name="Disabled">false</bool>
+				<token name="RunContext">2</token>
+			</Properties>
+		</Item>
+		<Item class="ModuleScript" referent="RBX9">
+			<Properties>
+				<string name="Name">GunController</string>
+				<string name="Source"><![CDATA[--!strict
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local WeaponConfig = require(ReplicatedStorage:FindFirstChild("WeaponConfig"))
+local RemoteEvents = require(ReplicatedStorage:FindFirstChild("RemoteEvents"))
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local GunController = {}
+local isInitialized = false
+
+local state = {
+	inMatch = false,
+	currentWeapon = "DefaultSniper",
+	ammo = 5,
+	reserveAmmo = 25,
+	isScoped = false,
+	isADS = false,
+	isReloading = false,
+	canShoot = true,
+	lastShotTime = 0,
+	currentSpread = 0,
+	recoilOffset = Vector2.new(0, 0),
+	swayOffset = Vector2.new(0, 0),
+	targetSway = Vector2.new(0, 0),
+	isHoldingBreath = false,
+	breatheTime = 0,
+	breatheCooldownTime = 0,
+}
+
+local weaponConfig = WeaponConfig.Weapons[state.currentWeapon]
+
+function GunController:Initialize()
+	if isInitialized then
+		return
+	end
+	isInitialized = true
+	
+	self:SetupInput()
+	self:SetupRemotes()
+	self:CreateGui()
+	
+	RunService.RenderStepped:Connect(function(deltaTime)
+		self:UpdateSway(deltaTime)
+		self:UpdateRecoil(deltaTime)
+		self:UpdateBreathing(deltaTime)
+		self:UpdateCamera(deltaTime)
+	end)
+end
+
+function GunController:SetupInput()
+	UserInputService.InputBegan:Connect(function(input, gameProcessed)
+		if gameProcessed then
+			return
+		end
+		
+		if not state.inMatch then
+			return
+		end
+		
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			self:Shoot()
+		end
+		
+		if input.KeyCode == Enum.KeyCode.R then
+			self:StartReload()
+		end
+		
+		if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.ButtonR2 then
+			if not state.isScoped then
+				self:StartScope()
+			end
+		end
+		
+		if input.KeyCode == Enum.KeyCode.LeftControl then
+			state.isHoldingBreath = true
+		end
+	end)
+	
+	UserInputService.InputEnded:Connect(function(input, gameProcessed)
+		if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.ButtonR2 then
+			self:EndScope()
+		end
+		
+		if input.KeyCode == Enum.KeyCode.LeftControl then
+			state.isHoldingBreath = false
+		end
+	end)
+end
+
+function GunController:SetupRemotes()
+	RemoteEvents.MatchStateChanged.OnClientEvent:Connect(function(newState, matchId)
+		if newState == "InProgress" then
+			state.inMatch = true
+			state.ammo = weaponConfig.MagazineSize
+			state.reserveAmmo = weaponConfig.TotalAmmo
+			self:ShowUI(true)
+		elseif newState == "Ended" or newState == "WaitingForPlayers" then
+			state.inMatch = false
+			state.isScoped = false
+			state.isADS = false
+			camera.FieldOfView = 70
+			self:ShowUI(false)
+		end
+	end)
+	
+	RemoteEvents.BulletHit.OnClientEvent:Connect(function(hitType, ...)
+		local args = {...}
+		if hitType == "Hit" then
+			self:OnHit(args[1], args[2], args[3])
+		elseif hitType == "Miss" then
+			self:OnMiss(args[1])
+		elseif hitType == "Damaged" then
+			self:OnDamaged(args[1], args[2], args[3])
+		end
+	end)
+	
+	RemoteEvents.WeaponEquipped.OnClientEvent:Connect(function(weaponName)
+		state.currentWeapon = weaponName
+		weaponConfig = WeaponConfig.Weapons[weaponName]
+		state.ammo = weaponConfig.MagazineSize
+		state.reserveAmmo = weaponConfig.TotalAmmo
+		self:UpdateAmmoDisplay()
+	end)
+	
+	RemoteEvents.PlayerDied.OnClientEvent:Connect(function(message, killerName, killedName, headshot)
+		self:AddKillFeedMessage(message, headshot)
+	end)
+end
+
+function GunController:Shoot()
+	if not state.canShoot or state.isReloading or state.isScoped then
+		return
+	end
+	
+	local currentTime = tick()
+	if currentTime - state.lastShotTime < weaponConfig.FireRate then
+		return
+	end
+	
+	if state.ammo <= 0 then
+		self:PlaySound("Empty")
+		return
+	end
+	
+	state.lastShotTime = currentTime
+	state.ammo -= 1
+	state.canShoot = false
+	
+	local spreadRad = math.rad(state.currentSpread)
+	local spreadX = (math.random() - 0.5) * spreadRad * 2
+	local spreadY = (math.random() - 0.5) * spreadRad * 2
+	
+	local origin = camera.CFrame.Position
+	local direction = (camera.CFrame.LookVector + camera.CFrame.RightVector * spreadX + camera.CFrame.UpVector * spreadY).Unit
+	
+	RemoteEvents.FireBullet:FireServer(state.currentWeapon, origin, direction)
+	
+	state.currentSpread = math.min(state.currentSpread + weaponConfig.SpreadPerShot, weaponConfig.MaxSpread)
+	
+	self:ApplyRecoil()
+	self:PlaySound("Fire")
+	self:ShowMuzzleFlash()
+	
+	self:UpdateAmmoDisplay()
+	
+	task.delay(weaponConfig.ChamberTime, function()
+		state.canShoot = true
+	end)
+end
+
+function GunController:StartReload()
+	if state.isReloading or state.ammo >= weaponConfig.MagazineSize or state.reserveAmmo <= 0 then
+		return
+	end
+	
+	state.isReloading = true
+	RemoteEvents.ReloadStarted:FireServer(state.currentWeapon)
+	self:PlaySound("ReloadStart")
+	self:ShowReloadUI(true)
+	
+	task.spawn(function()
+		if weaponConfig.ReloadType == "SingleRound" then
+			local roundsToReload = math.min(weaponConfig.MagazineSize - state.ammo, state.reserveAmmo)
+			for i = 1, roundsToReload do
+				task.wait(weaponConfig.SingleReloadTime)
+				if not state.isReloading then
+					break
+				end
+				state.ammo += 1
+				state.reserveAmmo -= 1
+				self:UpdateAmmoDisplay()
+				self:PlaySound("Chamber")
+			end
+		else
+			task.wait(weaponConfig.ReloadTime)
+			local roundsNeeded = weaponConfig.MagazineSize - state.ammo
+			local roundsToReload = math.min(roundsNeeded, state.reserveAmmo)
+			state.ammo += roundsToReload
+			state.reserveAmmo -= roundsToReload
+			self:UpdateAmmoDisplay()
+		end
+		
+		state.isReloading = false
+		self:PlaySound("ReloadEnd")
+		self:ShowReloadUI(false)
+	end)
+end
+
+function GunController:StartScope()
+	if not state.inMatch then
+		return
+	end
+	state.isScoped = true
+	self:ShowScopeOverlay(true)
+	RemoteEvents.ScopeChanged:FireServer(true)
+end
+
+function GunController:EndScope()
+	state.isScoped = false
+	self:ShowScopeOverlay(false)
+	camera.FieldOfView = 70
+	RemoteEvents.ScopeChanged:FireServer(false)
+end
+
+function GunController:ApplyRecoil()
+	local recoilV = weaponConfig.RecoilVertical
+	local recoilH = (math.random() - 0.5) * weaponConfig.RecoilHorizontal * 2
+	state.recoilOffset = state.recoilOffset + Vector2.new(recoilH, recoilV)
+end
+
+function GunController:UpdateRecoil(deltaTime: number)
+	if state.recoilOffset.Magnitude > 0 then
+		local recovery = weaponConfig.RecoilRecoverySpeed * deltaTime
+		if state.recoilOffset.Magnitude <= recovery then
+			state.recoilOffset = Vector2.new(0, 0)
+		else
+			state.recoilOffset = state.recoilOffset - state.recoilOffset.Unit * recovery
+		end
+	end
+end
+
+function GunController:UpdateSway(deltaTime: number)
+	local mouseDelta = UserInputService:GetMouseDelta()
+	local swayMultiplier = weaponConfig.SwayAmount
+	
+	if state.isHoldingBreath then
+		swayMultiplier = swayMultiplier * weaponConfig.BreatheSwayMultiplier
+	end
+	
+	state.targetSway = Vector2.new(
+		-mouseDelta.X * swayMultiplier,
+		-mouseDelta.Y * swayMultiplier
+	)
+	
+	state.swayOffset = state.swayOffset:Lerp(state.targetSway, weaponConfig.SwaySmoothing * deltaTime)
+end
+
+function GunController:UpdateBreathing(deltaTime: number)
+	if state.isHoldingBreath and state.breatheCooldownTime <= 0 then
+		state.breatheTime += deltaTime
+		if state.breatheTime >= weaponConfig.BreatheHoldDuration then
+			state.isHoldingBreath = false
+			state.breatheCooldownTime = weaponConfig.BreatheCooldown
+			state.breatheTime = 0
+		end
+	end
+	
+	if state.breatheCooldownTime > 0 then
+		state.breatheCooldownTime -= deltaTime
+	end
+end
+
+function GunController:UpdateCamera(deltaTime: number)
+	if not state.inMatch then
+		return
+	end
+	
+	local totalOffset = state.recoilOffset + state.swayOffset
+	local offsetCFrame = camera.CFrame * CFrame.Angles(
+		math.rad(-totalOffset.Y),
+		math.rad(-totalOffset.X),
+		0
+	)
+	camera.CFrame = offsetCFrame
+	
+	if state.isScoped then
+		local targetFOV = weaponConfig.ZoomFOV
+		camera.FieldOfView = camera.FieldOfView + (targetFOV - camera.FieldOfView) * 0.1
+	end
+end
+
+function GunController:OnHit(targetName: string, damage: number, headshot: boolean)
+	self:ShowHitmarker(false)
+	self:UpdateAmmoDisplay()
+end
+
+function GunController:OnMiss(hitPosition: Vector3)
+	self:ShowHitmarker(true)
+end
+
+function GunController:OnDamaged(damage: number, origin: Vector3, direction: Vector3)
+	self:ShowDamageVignette(damage)
+end
+
+function GunController:PlaySound(soundName: string)
+	local soundId = weaponConfig.Sounds[soundName]
+	if not soundId then
+		return
+	end
+	
+	local sound = Instance.new("Sound")
+	sound.SoundId = soundId
+	sound.Volume = 0.5
+	sound.Parent = player.PlayerGui
+	sound:Play()
+	
+	game:GetService("Debris"):AddItem(sound, 2)
+end
+
+function GunController:CreateGui()
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "SniperDuelsUI"
+	screenGui.ResetOnSpawn = false
+	screenGui.Parent = player.PlayerGui
+	
+	local crosshair = Instance.new("Frame")
+	crosshair.Name = "Crosshair"
+	crosshair.Size = UDim2.new(0, 0, 0, 0)
+	crosshair.Position = UDim2.new(0.5, 0, 0.5, 0)
+	crosshair.BackgroundTransparency = 1
+	crosshair.Parent = screenGui
+	
+	for i = 1, 4 do
+		local line = Instance.new("Frame")
+		line.Name = "Line" .. i
+		line.BackgroundColor3 = WeaponConfig.Crosshair.DefaultColor
+		line.BackgroundTransparency = 0
+		line.AnchorPoint = Vector2.new(0.5, 0.5)
+		line.Parent = crosshair
+		
+		local cSize = WeaponConfig.Crosshair.Size
+		local cGap = WeaponConfig.Crosshair.Gap
+		local cThick = WeaponConfig.Crosshair.Thickness
+		
+		if i == 1 then
+			line.Size = UDim2.new(0, cThick, 0, cSize)
+			line.Position = UDim2.new(0.5, 0, 0.5, -(cGap + cSize))
+		elseif i == 2 then
+			line.Size = UDim2.new(0, cThick, 0, cSize)
+			line.Position = UDim2.new(0.5, 0, 0.5, cGap)
+		elseif i == 3 then
+			line.Size = UDim2.new(0, cSize, 0, cThick)
+			line.Position = UDim2.new(0.5, -(cGap + cSize), 0.5, 0)
+		elseif i == 4 then
+			line.Size = UDim2.new(0, cSize, 0, cThick)
+			line.Position = UDim2.new(0.5, cGap, 0.5, 0)
+		end
+	end
+	
+	if WeaponConfig.Crosshair.DotEnabled then
+		local dot = Instance.new("Frame")
+		dot.Name = "Dot"
+		dot.Size = UDim2.new(0, WeaponConfig.Crosshair.DotSize, 0, WeaponConfig.Crosshair.DotSize)
+		dot.Position = UDim2.new(0.5, -WeaponConfig.Crosshair.DotSize / 2, 0.5, -WeaponConfig.Crosshair.DotSize / 2)
+		dot.BackgroundColor3 = WeaponConfig.Crosshair.DefaultColor
+		dot.BackgroundTransparency = 0
+		dot.Parent = crosshair
+	end
+	
+	local ammoFrame = Instance.new("Frame")
+	ammoFrame.Name = "AmmoDisplay"
+	ammoFrame.Size = UDim2.new(0, 200, 0, 50)
+	ammoFrame.Position = UDim2.new(0.5, -100, 0.9, 0)
+	ammoFrame.BackgroundTransparency = 1
+	ammoFrame.Parent = screenGui
+	
+	local ammoLabel = Instance.new("TextLabel")
+	ammoLabel.Name = "AmmoText"
+	ammoLabel.Size = UDim2.new(1, 0, 1, 0)
+	ammoLabel.BackgroundTransparency = 1
+	ammoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	ammoLabel.TextScaled = true
+	ammoLabel.Font = Enum.Font.GothamBold
+	ammoLabel.Text = "5 / 25"
+	ammoLabel.TextStrokeTransparency = 0.5
+	ammoLabel.Parent = ammoFrame
+	
+	local hitmarker = Instance.new("Frame")
+	hitmarker.Name = "Hitmarker"
+	hitmarker.Size = UDim2.new(0, 0, 0, 0)
+	hitmarker.Position = UDim2.new(0.5, 0, 0.5, 0)
+	hitmarker.BackgroundTransparency = 1
+	hitmarker.Visible = false
+	hitmarker.Parent = screenGui
+	
+	for i = 1, 4 do
+		local line = Instance.new("Frame")
+		line.Name = "HitLine" .. i
+		line.BackgroundColor3 = WeaponConfig.Hitmarker.BaseColor
+		line.Size = UDim2.new(0, 12, 0, 2)
+		line.AnchorPoint = Vector2.new(0.5, 0.5)
+		
+		local angle = (i - 1) * 90 + WeaponConfig.Hitmarker.SpreadAngle
+		line.Rotation = angle
+		line.Parent = hitmarker
+	end
+	
+	local scopeOverlay = Instance.new("Frame")
+	scopeOverlay.Name = "ScopeOverlay"
+	scopeOverlay.Size = UDim2.new(1, 0, 1, 0)
+	scopeOverlay.BackgroundTransparency = 1
+	scopeOverlay.Visible = false
+	scopeOverlay.ZIndex = 10
+	scopeOverlay.Parent = screenGui
+	
+	local scopeBorder = Instance.new("Frame")
+	scopeBorder.Name = "ScopeBorder"
+	scopeBorder.Size = UDim2.new(1, 0, 1, 0)
+	scopeBorder.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	scopeBorder.BackgroundTransparency = 0.6
+	scopeBorder.ZIndex = 11
+	scopeBorder.Parent = scopeOverlay
+	
+	local scopeCircle = Instance.new("ImageLabel")
+	scopeCircle.Name = "ScopeCircle"
+	scopeCircle.Size = UDim2.new(0.5, 0, 0.5, 0)
+	scopeCircle.Position = UDim2.new(0.25, 0, 0.25, 0)
+	scopeCircle.BackgroundTransparency = 1
+	scopeCircle.Image = "rbxassetid://1234567890"
+	scopeCircle.ZIndex = 12
+	scopeCircle.Parent = scopeOverlay
+	
+	local killFeed = Instance.new("Frame")
+	killFeed.Name = "KillFeed"
+	killFeed.Size = UDim2.new(0, 300, 0, 200)
+	killFeed.Position = UDim2.new(0.02, 0, 0.02, 0)
+	killFeed.BackgroundTransparency = 1
+	killFeed.Parent = screenGui
+	
+	local reloadBar = Instance.new("Frame")
+	reloadBar.Name = "ReloadBar"
+	reloadBar.Size = UDim2.new(0, 200, 0, 4)
+	reloadBar.Position = UDim2.new(0.5, -100, 0.85, 0)
+	reloadBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	reloadBar.BackgroundTransparency = 0.5
+	reloadBar.Visible = false
+	reloadBar.Parent = screenGui
+	
+	local reloadProgress = Instance.new("Frame")
+	reloadProgress.Name = "ReloadProgress"
+	reloadProgress.Size = UDim2.new(0, 0, 1, 0)
+	reloadProgress.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	reloadProgress.Parent = reloadBar
+	
+	local damageVignette = Instance.new("Frame")
+	damageVignette.Name = "DamageVignette"
+	damageVignette.Size = UDim2.new(1, 0, 1, 0)
+	damageVignette.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+	damageVignette.BackgroundTransparency = 1
+	damageVignette.Visible = false
+	damageVignette.ZIndex = 5
+	damageVignette.Parent = screenGui
+	
+	state.screenGui = screenGui
+end
+
+function GunController:ShowUI(visible: boolean)
+	if state.screenGui then
+		state.screenGui.Enabled = visible
+	end
+end
+
+function GunController:UpdateAmmoDisplay()
+	local ammoText = state.screenGui:FindFirstChild("AmmoDisplay")
+	if ammoText then
+		local label = ammoText:FindFirstChild("AmmoText")
+		if label then
+			label.Text = state.ammo .. " / " .. state.reserveAmmo
+		end
+	end
+end
+
+function GunController:ShowHitmarker(miss: boolean)
+	local hitmarker = state.screenGui:FindFirstChild("Hitmarker")
+	if not hitmarker then
+		return
+	end
+	
+	hitmarker.Visible = true
+	local duration = WeaponConfig.Hitmarker.Duration
+	
+	for _, child in ipairs(hitmarker:GetChildren()) do
+		if child:IsA("Frame") then
+			child.BackgroundColor3 = WeaponConfig.Hitmarker.BaseColor
+		end
+	end
+	
+	task.delay(duration, function()
+		hitmarker.Visible = false
+	end)
+end
+
+function GunController:ShowScopeOverlay(visible: boolean)
+	local scopeOverlay = state.screenGui:FindFirstChild("ScopeOverlay")
+	if scopeOverlay then
+		scopeOverlay.Visible = visible
+	end
+end
+
+function GunController:ShowReloadUI(visible: boolean)
+	local reloadBar = state.screenGui:FindFirstChild("ReloadBar")
+	if reloadBar then
+		reloadBar.Visible = visible
+	end
+end
+
+function GunController:ShowMuzzleFlash()
+	local flash = Instance.new("Frame")
+	flash.Name = "MuzzleFlash"
+	flash.Size = UDim2.new(0.2, 0, 0.2, 0)
+	flash.Position = UDim2.new(0.4, 0, 0.4, 0)
+	flash.BackgroundColor3 = Color3.fromRGB(255, 255, 200)
+	flash.BackgroundTransparency = 0.3
+	flash.ZIndex = 2
+	flash.Parent = state.screenGui
+	
+	task.delay(weaponConfig.MuzzleFlashDuration, function()
+		flash:Destroy()
+	end)
+end
+
+function GunController:ShowDamageVignette(damage: number)
+	local vignette = state.screenGui:FindFirstChild("DamageVignette")
+	if not vignette then
+		return
+	end
+	
+	local intensity = math.min(1, damage / 50)
+	vignette.BackgroundTransparency = 1 - intensity * 0.7
+	vignette.Visible = true
+	
+	task.delay(0.3, function()
+		vignette.BackgroundTransparency = 1
+		vignette.Visible = false
+	end)
+end
+
+function GunController:AddKillFeedMessage(message: string, headshot: boolean)
+	local killFeed = state.screenGui:FindFirstChild("KillFeed")
+	if not killFeed then
+		return
+	end
+	
+	local killMessage = Instance.new("TextLabel")
+	killMessage.Size = UDim2.new(1, 0, 0, 30)
+	killMessage.BackgroundTransparency = 1
+	killMessage.TextColor3 = headshot and Color3.fromRGB(255, 200, 50) or Color3.fromRGB(255, 255, 255)
+	killMessage.TextXAlignment = Enum.TextXAlignment.Left
+	killMessage.TextStrokeTransparency = 0.5
+	killMessage.Font = Enum.Font.GothamBold
+	killMessage.TextSize = 16
+	killMessage.Text = message
+	killMessage.Parent = killFeed
+	
+	local messageCount = 0
+	for _, child in ipairs(killFeed:GetChildren()) do
+		if child:IsA("TextLabel") then
+			messageCount += 1
+		end
+	end
+	
+	if messageCount > WeaponConfig.KillFeed.MaxMessages then
+		local oldest = killFeed:GetChildren()[1]
+		if oldest then
+			oldest:Destroy()
+		end
+	end
+	
+	task.delay(WeaponConfig.KillFeed.Duration, function()
+		killMessage:Destroy()
+	end)
+end
+
+GunController:Initialize()
+
+return GunController]]></string>
+				<bool name="Disabled">false</bool>
+			</Properties>
+		</Item>
+	</Item>
+</Item>
+</roblox>

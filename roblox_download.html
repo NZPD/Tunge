@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Roblox Game Downloader</title>
+<style>
+body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
+h1 { color: #00d4ff; text-align: center; }
+input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #444; border-radius: 4px; background: #16213e; color: #fff; font-size: 16px; }
+button { background: #0f3460; color: #00d4ff; border: 2px solid #00d4ff; padding: 12px 30px; font-size: 16px; border-radius: 6px; cursor: pointer; margin: 10px 0; }
+button:hover { background: #00d4ff; color: #1a1a2e; }
+#log { background: #0d0d1a; border: 1px solid #333; padding: 15px; border-radius: 6px; margin-top: 20px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 13px; }
+.log-line { margin: 2px 0; }
+.success { color: #4caf50; }
+.error { color: #f44336; }
+.info { color: #00d4ff; }
+.warn { color: #ff9800; }
+</style>
+</head>
+<body>
+<h1>🔽 Roblox Game Downloader</h1>
+<p style="text-align:center;color:#888;">Runs in your browser — uses your current Roblox login session</p>
+
+<input type="text" id="gameId" placeholder="Game/Place ID (e.g. 97598239454123)" value="97598239454123">
+<input type="text" id="gameName" placeholder="Game name for folder" value="Grow-a-Garden-2">
+
+<button onclick="startDownload()">⬇ Download as .rbxm</button>
+
+<h3>Output:</h3>
+<div id="log"></div>
+
+<script>
+const log = document.getElementById('log');
+function addLog(msg, type = 'info') {
+    const line = document.createElement('div');
+    line.className = 'log-line ' + type;
+    line.textContent = msg;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+}
+
+async function fetchAPI(url, options = {}) {
+    const resp = await fetch(url, {
+        credentials: 'include',
+        ...options
+    });
+    return resp;
+}
+
+async function startDownload() {
+    log.innerHTML = '';
+    const gameId = document.getElementById('gameId').value.trim();
+    const gameName = document.getElementById('gameName').value.trim() || `game_${gameId}`;
+
+    if (!gameId.match(/^\d+$/)) {
+        addLog('Invalid ID - must be numbers only', 'error');
+        return;
+    }
+
+    addLog(`[1] Starting download for game ID: ${gameId}`, 'info');
+
+    // Step 1: Get CSRF token
+    addLog(`[2] Getting CSRF token...`, 'info');
+    try {
+        const csrfResp = await fetch('https://auth.roblox.com/v2/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        const csrf = csrfResp.headers.get('x-csrf-token');
+        if (csrf) addLog(`  CSRF: ${csrf.substring(0, 20)}...`, 'success');
+        else addLog('  No CSRF token', 'warn');
+    } catch (e) {
+        addLog(`  Error: ${e.message}`, 'warn');
+    }
+
+    // Step 2: Resolve game ID
+    addLog(`[3] Resolving game ID...`, 'info');
+    let placeId = gameId;
+    let universeId = null;
+
+    try {
+        let resp = await fetch(`https://apis.roblox.com/universes/v1/places/${gameId}`, { credentials: 'include' });
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.universeId) {
+                placeId = gameId;
+                universeId = data.universeId;
+                addLog(`  Place ID → Universe: ${universeId}`, 'success');
+            }
+        }
+    } catch (e) {}
+
+    if (!universeId) {
+        try {
+            let resp = await fetch(`https://games.roblox.com/v1/games?universeIds=${gameId}`, { credentials: 'include' });
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.data && data.data.length > 0) {
+                    universeId = gameId;
+                    placeId = data.data[0].rootPlaceId || gameId;
+                    addLog(`  Universe ID → Place: ${placeId}`, 'success');
+                }
+            }
+        } catch (e) {}
+    }
+
+    addLog(`  Place ID: ${placeId} | Universe: ${universeId || 'N/A'}`, 'info');
+
+    // Step 3: Try to download via asset delivery
+    addLog(`[4] Downloading .rbxm...`, 'info');
+
+    const urls = [
+        `https://assetdelivery.roblox.com/v1/asset?id=${placeId}`,
+        `https://assetdelivery.roblox.com/v1/asset?id=${placeId}&type=Place`,
+        `https://www.roblox.com/library/${placeId}/download`,
+        `https://www.roblox.com/games/${placeId}/Download`
+    ];
+
+    let downloaded = false;
+    let blobData = null;
+
+    for (const url of urls) {
+        if (downloaded) break;
+        addLog(`  Trying: ${url.substring(0, 60)}...`, 'info');
+        try {
+            const resp = await fetch(url, { credentials: 'include' });
+            const blob = await resp.blob();
+            const size = blob.size;
+            addLog(`    HTTP ${resp.status} (${formatBytes(size)})`, 'info');
+
+            if (resp.ok && size > 100) {
+                // Verify it's not HTML
+                const text = await blob.slice(0, 20).text();
+                if (!text.includes('<!DOCTYPE') && !text.includes('<html')) {
+                    blobData = blob;
+                    downloaded = true;
+                    addLog(`    ✅ SUCCESS: ${formatBytes(size)}`, 'success');
+                } else {
+                    addLog(`    ❌ Got HTML page instead of .rbxm (copying disabled)`, 'error');
+                }
+            }
+        } catch (e) {
+            addLog(`    Error: ${e.message}`, 'error');
+        }
+    }
+
+    // Step 4: Save file
+    if (downloaded && blobData) {
+        const safeName = gameName.replace(/[^\w\s\-\.]/g, '_').trim();
+        const filename = `${safeName}_${placeId}.rbxm`;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blobData);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+
+        addLog(`\n✅ FILE DOWNLOADED: ${filename}`, 'success');
+        addLog(`   Size: ${formatBytes(blobData.size)}`, 'success');
+        addLog(`   Saved to your Downloads folder`, 'success');
+
+        // Save info
+        const info = `Game: ${gameName}\nPlace ID: ${placeId}\nUniverse ID: ${universeId || 'N/A'}\nFetched: ${new Date().toISOString()}\n`;
+        const infoBlob = new Blob([info], { type: 'text/plain' });
+        const a2 = document.createElement('a');
+        a2.href = URL.createObjectURL(infoBlob);
+        a2.download = `game_info_${placeId}.txt`;
+        document.body.appendChild(a2);
+        a2.click();
+        document.body.removeChild(a2);
+    } else {
+        addLog(`\n❌ FAILED: Could not download the game file.`, 'error');
+        addLog(`   This game likely has copying disabled by the creator.`, 'warn');
+        addLog(`   Roblox blocks the download server-side when copying is off.`, 'warn');
+    }
+}
+
+function formatBytes(bytes) {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let val = bytes;
+    for (const u of units) {
+        if (val < 1024) return `${val.toFixed(2)} ${u}`;
+        val /= 1024;
+    }
+    return `${val.toFixed(2)} TB`;
+}
+</script>
+</body>
+</html>

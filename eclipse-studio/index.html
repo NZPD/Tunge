@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Eclipse — Game Studio</title>
+    <meta name="description" content="Eclipse is a game development studio dedicated to creating and innovating immersive experiences on Roblox."/>
+    <meta property="og:title" content="Eclipse Studio"/>
+    <meta property="og:description" content="Eclipse is a game development studio dedicated to creating and innovating immersive experiences on Roblox."/>
+    <meta property="og:url" content="https://eclipse.studio"/>
+    <meta property="og:type" content="website"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌘</text></svg>"/>
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #000; color: #fff; min-height: 100vh;
+        }
+        a { text-decoration: none; color: inherit; }
+        img { max-width: 100%; display: block; }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+            background: linear-gradient(to right, rgba(124,58,237,0.15), rgba(139,92,246,0.10), rgba(124,58,237,0.15));
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            transform: translateY(-100%); opacity: 0;
+        }
+        nav.visible { transform: translateY(0); opacity: 1; }
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;
+            display: flex; align-items: center; justify-content: space-between; height: 72px;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 0.6rem; }
+        .nav-logo .logo-icon { width: 42px; height: 42px; border-radius: 0.5rem; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: rgba(124,58,237,0.2); }
+        .nav-logo span { font-size: 1.35rem; font-weight: 700; color: #fff; }
+        .nav-links { display: none; align-items: center; gap: 2.5rem; }
+        .nav-links a { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.7); position: relative; transition: color 0.3s; }
+        .nav-links a:hover { color: #c4b5fd; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: #a78bfa; transition: width 0.3s; }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-cta { display: none; padding: 0.6rem 1.25rem; border-radius: 999px; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font-size: 0.85rem; font-weight: 500; transition: opacity 0.3s; }
+        .nav-cta:hover { opacity: 0.9; }
+        .menu-toggle { display: block; background: none; border: none; color: #fff; cursor: pointer; padding: 0.25rem; }
+        @media (min-width: 768px) { .nav-links { display: flex; } .nav-cta { display: inline-flex; } .menu-toggle { display: none; } }
+
+        .hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; background: #000; }
+        .hero-bg-img { position: absolute; inset: 0; }
+        .hero-bg-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .hero-stars { position: absolute; inset: 0; overflow: hidden; }
+        .hero-stars span { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; animation: twinkle 3s ease-in-out infinite alternate; }
+        @keyframes twinkle { 0% { opacity: 0.15; } 100% { opacity: 1; } }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, #000, transparent 50%, transparent), linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 40%); }
+        .hero-content { position: relative; z-index: 10; max-width: 1200px; margin: 0 auto; width: 100%; padding: 6rem 1.5rem 4rem; }
+        .hero-content h1 { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 1rem; max-width: 720px; }
+        .hero-content h1 br { display: none; }
+        @media (min-width: 768px) { .hero-content h1 { font-size: 4.5rem; } .hero-content h1 br { display: block; } }
+        @media (min-width: 1024px) { .hero-content h1 { font-size: 5.5rem; } }
+        .hero-content p { font-size: 1rem; color: rgba(255,255,255,0.6); max-width: 500px; margin-bottom: 2rem; line-height: 1.7; }
+        @media (min-width: 640px) { .hero-content p { font-size: 1.1rem; } }
+        .hero-stats { display: flex; gap: 1.5rem 2.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .hero-stats .stat-value { font-size: 1.4rem; font-weight: 700; color: #fff; }
+        .hero-stats .stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 0.1rem; }
+        .hero-buttons { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+        .hero-buttons .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.75rem; border-radius: 0.5rem; background: rgba(124,58,237,0.25); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-weight: 500; font-size: 0.95rem; transition: background 0.2s; }
+        .hero-buttons .btn-primary:hover { background: rgba(124,58,237,0.35); }
+        .hero-buttons .btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.75rem; border-radius: 0.5rem; background: linear-gradient(135deg, rgba(139,13,131,0.5), rgba(13,44,161,0.5)); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-weight: 500; font-size: 0.95rem; transition: background 0.2s; }
+        .hero-buttons .btn-secondary:hover { opacity: 0.9; }
+
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        section { padding: 5rem 1.5rem; }
+        @media (min-width: 768px) { section { padding: 6rem 1.5rem; } }
+        .section-header { text-align: center; margin-bottom: 3.5rem; }
+        .section-label { font-size: 0.75rem; font-weight: 600; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.12em; display: block; margin-bottom: 0.75rem; }
+        .section-title { font-size: 2rem; font-weight: 700; color: #fff; line-height: 1.2; }
+        @media (min-width: 768px) { .section-title { font-size: 2.8rem; } }
+
+        #experiences { background: #000; }
+        .exp-grid { display: grid; gap: 1.5rem; }
+        @media (min-width: 640px) { .exp-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .exp-grid { grid-template-columns: repeat(3, 1fr); } }
+        .exp-card { border-radius: 0.75rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); backdrop-filter: blur(6px); transition: transform 0.25s ease, box-shadow 0.25s ease; display: block; }
+        .exp-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(124,58,237,0.12); }
+        .exp-thumb { height: 170px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .exp-thumb .thumb-emoji { font-size: 3rem; opacity: 0.4; }
+        .exp-thumb .playing-badge { position: absolute; bottom: 0.75rem; left: 0.75rem; display: flex; align-items: center; gap: 0.3rem; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); padding: 0.25rem 0.6rem; border-radius: 999px; color: #fff; font-size: 0.7rem; font-weight: 500; }
+        .exp-thumb .playing-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse-dot 1.8s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .exp-info { padding: 1.25rem; }
+        .exp-info h3 { font-size: 1rem; font-weight: 600; color: #fff; margin-bottom: 0.35rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .exp-info .visits { font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: 500; }
+        .exp-cta { margin-top: 2.5rem; text-align: center; }
+        .exp-cta a { display: inline-flex; align-items: center; padding: 0.6rem 1.5rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 0.85rem; font-weight: 500; transition: border-color 0.2s, color 0.2s; }
+        .exp-cta a:hover { border-color: rgba(167,139,250,0.3); color: #c4b5fd; }
+
+        #mission { background: linear-gradient(to bottom, #000, rgba(124,58,237,0.04)); }
+        .mission-grid { display: grid; gap: 1.5rem; }
+        @media (min-width: 768px) { .mission-grid { grid-template-columns: repeat(3, 1fr); } }
+        .mission-card { padding: 2rem; border-radius: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); text-align: center; transition: transform 0.25s ease; }
+        .mission-card:hover { transform: translateY(-3px); }
+        .mission-icon { width: 52px; height: 52px; border-radius: 0.75rem; background: rgba(124,58,237,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+        .mission-icon svg { width: 22px; height: 22px; color: #a78bfa; }
+        .mission-card h3 { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+        .mission-card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+        #team { background: #000; }
+        .team-grid { display: grid; gap: 1.5rem; }
+        @media (min-width: 500px) { .team-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 860px) { .team-grid { grid-template-columns: repeat(4, 1fr); } }
+        .team-card { border-radius: 0.75rem; overflow: hidden; background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(99,102,241,0.10)); border: 1px solid rgba(255,255,255,0.06); text-align: center; transition: transform 0.25s ease, box-shadow 0.25s ease; display: block; }
+        .team-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(124,58,237,0.15); }
+        .team-avatar { height: 160px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .team-details { padding: 1.25rem; }
+        .team-details h3 { font-weight: 600; color: #fff; margin-bottom: 0.1rem; }
+        .team-details .team-username { font-size: 0.75rem; color: rgba(167,139,250,0.6); margin-bottom: 0.3rem; }
+        .team-details .team-role { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.5); }
+
+        #news { background: #000; }
+        .news-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+        .news-card { padding: 2rem; border-radius: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); text-align: center; transition: transform 0.25s ease; cursor: default; }
+        .news-card:hover { transform: translateY(-3px); }
+        .news-icon { width: 52px; height: 52px; border-radius: 0.75rem; background: rgba(124,58,237,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+        .news-icon svg { width: 22px; height: 22px; color: #a78bfa; }
+        .news-card h3 { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+        .news-card p { font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+        #contact { background: linear-gradient(to bottom, rgba(124,58,237,0.04), #000); }
+        .contact-form { max-width: 520px; margin: 0 auto; background: rgba(255,255,255,0.04); backdrop-filter: blur(12px); border-radius: 0.75rem; padding: 2rem; border: 1px solid rgba(255,255,255,0.06); }
+        .form-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
+        @media (min-width: 500px) { .form-row { grid-template-columns: 1fr 1fr; } }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 0.35rem; }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.6rem 0.9rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); font-size: 0.85rem; color: #fff; outline: none; font-family: inherit; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group textarea:focus { border-color: #7c3aed; }
+        .form-group textarea { resize: vertical; min-height: 90px; }
+        .btn-submit { width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.7rem 1.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #7c3aed, #6366f1); color: #fff; font-weight: 500; font-size: 0.9rem; border: none; cursor: pointer; transition: opacity 0.2s; }
+        .btn-submit:hover { opacity: 0.9; }
+        .btn-admin { margin-top: 1rem; text-align: center; }
+        .btn-admin button { background: none; border: none; color: rgba(255,255,255,0.2); font-size: 0.7rem; cursor: pointer; transition: color 0.2s; }
+        .btn-admin button:hover { color: rgba(255,255,255,0.5); }
+        .contact-links { margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 1.25rem; flex-wrap: wrap; }
+        .contact-links a { font-size: 0.8rem; color: rgba(255,255,255,0.4); transition: color 0.2s; }
+        .contact-links a:hover { color: #a78bfa; }
+        .contact-links .dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+
+        footer { border-top: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; }
+        .footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 0.5rem; text-align: center; }
+        @media (min-width: 640px) { .footer-inner { grid-template-columns: 1fr auto 1fr; align-items: center; } .footer-inner .brand { text-align: left; } .footer-inner .copy { text-align: right; } }
+        footer .brand { font-weight: 600; color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+        footer .credit { font-size: 0.75rem; color: rgba(255,255,255,0.3); }
+        footer .copy { font-size: 0.75rem; color: rgba(255,255,255,0.3); }
+
+        /* Admin panel */
+        .admin-overlay {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center; padding: 1.5rem;
+        }
+        .admin-overlay.open { display: flex; }
+        .admin-panel {
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0.75rem; padding: 2rem; max-width: 500px; width: 100%;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .admin-panel h2 { font-size: 1.3rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+        .admin-panel p { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 1.5rem; }
+        .admin-panel label { display: block; font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 0.35rem; }
+        .admin-panel input, .admin-panel select, .admin-panel textarea {
+            width: 100%; padding: 0.6rem 0.9rem; border-radius: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05);
+            font-size: 0.85rem; color: #fff; outline: none; font-family: inherit; margin-bottom: 1rem;
+        }
+        .admin-panel input:focus, .admin-panel select:focus, .admin-panel textarea:focus { border-color: #7c3aed; }
+        .admin-panel .btn-row { display: flex; gap: 0.75rem; }
+        .admin-panel .btn-save {
+            flex: 1; padding: 0.6rem; border-radius: 0.5rem;
+            background: linear-gradient(135deg, #7c3aed, #6366f1);
+            color: #fff; font-weight: 500; border: none; cursor: pointer;
+        }
+        .admin-panel .btn-close {
+            padding: 0.6rem 1rem; border-radius: 0.5rem;
+            background: rgba(255,255,255,0.1); color: #fff; border: none; cursor: pointer;
+        }
+        .admin-panel .error { color: #f87171; font-size: 0.8rem; margin-bottom: 0.75rem; display: none; }
+        .post-item {
+            padding: 0.75rem; border-radius: 0.5rem; background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06); margin-bottom: 0.75rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .post-item .post-info { flex: 1; }
+        .post-item .post-info strong { display: block; font-size: 0.85rem; color: #fff; }
+        .post-item .post-info span { font-size: 0.7rem; color: rgba(255,255,255,0.3); }
+        .post-item .post-del { background: none; border: none; color: #f87171; cursor: pointer; font-size: 0.8rem; padding: 0.25rem; }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo"><div class="logo-icon">🌘</div><span>Eclipse</span></a>
+            <ul class="nav-links">
+                <li><a href="#experiences">Experiences</a></li>
+                <li><a href="#mission">Mission</a></li>
+                <li><a href="#news">News</a></li>
+                <li><a href="#team">Team</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <a href="#contact" class="nav-cta">Work with us</a>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-bg-img"><img src="https://devforum-uploads.s3.dualstack.us-east-2.amazonaws.com/uploads/original/4X/7/f/3/7f3ab11ae38410b5ef9349a731c9b76173aecd4a.jpeg" alt="Roblox games background" /></div>
+        <div class="hero-stars" id="stars"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="reveal">Building games<br/>that bring people together</h1>
+            <p class="reveal">Eclipse Studio creates polished, immersive Roblox experiences that players love.</p>
+            <div class="hero-stats reveal">
+                <div><div class="stat-value">3</div><div class="stat-label">Members</div></div>
+                <div><div class="stat-value">2</div><div class="stat-label">Communities</div></div>
+                <div><div class="stat-value" style="color:#4ade80;">●</div><div class="stat-label">Live</div></div>
+            </div>
+            <div class="hero-buttons reveal">
+                <a href="#experiences" class="btn-primary"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg> Our Experiences</a>
+                <a href="#contact" class="btn-secondary"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg> Work With Us</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="experiences">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header"><span class="section-label reveal">Our portfolio</span><h2 class="section-title reveal">Experiences we've shipped</h2></div>
+            <div class="exp-grid" id="gamesGrid"></div>
+            <div class="exp-cta reveal"><a href="https://www.roblox.com/communities/986359394/Smooth-Fidget-Obby" target="_blank" rel="noopener">View our communities →</a></div>
+        </div>
+    </section>
+
+    <section id="mission">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header"><span class="section-label reveal">Our mission</span><h2 class="section-title reveal">Building games that bring people together</h2></div>
+            <div class="mission-grid">
+                <div class="mission-card reveal"><div class="mission-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4a6 6 0 0 1 6 6v.5"/><path d="M17 10.5c0 2.5-1.5 4.5-3 6"/><path d="M8 6.5C6 7.5 4 10 4 13c0 3 2 5.5 4 7"/><path d="M13 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/><path d="M20 8.5A8.5 8.5 0 0 0 11.5 3"/></svg></div><h3>Create</h3><p>We design and develop polished, immersive Roblox experiences that players love. Every game starts with a spark and becomes a world.</p></div>
+                <div class="mission-card reveal"><div class="mission-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div><h3>Build</h3><p>From concept to launch, our team delivers high-quality gameplay, stunning visuals, and experiences that keep players coming back.</p></div>
+                <div class="mission-card reveal"><div class="mission-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Connect</h3><p>We build communities around our games. Eclipse is about bringing millions of players together through unforgettable shared moments.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== NEWS ===== -->
+    <section id="news">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header"><span class="section-label reveal">Stay updated</span><h2 class="section-title reveal">News & Updates</h2></div>
+            <div class="news-grid" id="newsGrid">
+                <div class="news-card reveal" data-filter="all" onclick="filterPosts('all')" style="cursor:pointer;"><div class="news-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><h3>All Posts</h3><p>View every update from Eclipse in one place.</p></div>
+                <div class="news-card reveal" data-filter="devlog" onclick="filterPosts('devlog')" style="cursor:pointer;"><div class="news-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div><h3>Development Logs</h3><p>Follow along as we build our next experiences — sneak peeks, behind-the-scenes, and WIP features.</p></div>
+                <div class="news-card reveal" data-filter="announcement" onclick="filterPosts('announcement')" style="cursor:pointer;"><div class="news-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg></div><h3>Studio Announcements</h3><p>Official news from Eclipse — new hires, partnerships, milestones, and major updates.</p></div>
+                <div class="news-card reveal" data-filter="patch" onclick="filterPosts('patch')" style="cursor:pointer;"><div class="news-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg></div><h3>Patch Notes</h3><p>Every update, bug fix, and improvement across all our games documented in detail.</p></div>
+                <div class="news-card reveal" data-filter="event" onclick="filterPosts('event')" style="cursor:pointer;"><div class="news-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg></div><h3>Upcoming Events</h3><p>Seasonal events, game jams, community competitions, and more — stay tuned for dates.</p></div>
+            </div>
+            <div id="activeFilter" style="text-align:center;margin-bottom:1rem;font-size:0.75rem;color:rgba(167,139,250,0.6);min-height:1.2rem;"></div>
+            <div id="newsPosts" style="max-width:600px;margin:0 auto 1rem;"></div>
+            <div class="btn-admin"><button onclick="openAdmin()" title="Admin panel">⚙️ Manage</button></div>
+        </div>
+    </section>
+
+    <!-- ===== TEAM ===== -->
+    <section id="team">
+        <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header"><span class="section-label reveal">The team</span><h2 class="section-title reveal">The people behind Eclipse</h2></div>
+            <div class="team-grid" id="teamGrid"></div>
+        </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact">
+        <div style="max-width:640px;margin:0 auto;padding:0 1.5rem;">
+            <div class="section-header"><span class="section-label reveal">Contact</span><h2 class="section-title reveal">Let's work together</h2></div>
+            <div class="contact-form reveal">
+                <form id="contactForm">
+                    <div class="form-row">
+                        <div><label for="name">Name</label><input id="name" type="text" placeholder="Your name" required/></div>
+                        <div><label for="email">Email</label><input id="email" type="email" placeholder="you@example.com" required/></div>
+                    </div>
+                    <div class="form-group"><label for="subject">Subject</label><input id="subject" type="text" placeholder="What's this about?"/></div>
+                    <div class="form-group"><label for="message">Message</label><textarea id="message" rows="4" placeholder="Tell us more..." required></textarea></div>
+                    <button type="submit" id="submitBtn" class="btn-submit">Send message <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4Z"/></svg></button>
+                </form>
+                <div class="contact-links">
+                    <a href="https://www.roblox.com/communities/986359394/Smooth-Fidget-Obby" target="_blank" rel="noopener">Smooth Fidget Obby</a>
+                    <span class="dot"></span>
+                    <a href="https://www.roblox.com/communities/244272608/Onyx-Invictia#!/about" target="_blank" rel="noopener">Onyx Invictia</a>
+                    <span class="dot"></span>
+                    <a href="https://discord.gg/eclipse" target="_blank" rel="noopener">Discord</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-inner"><div class="brand">🌘 Eclipse</div><div class="credit">Made by <span style="color:rgba(167,139,250,0.7);">VyTaxian</span></div><div class="copy">© 2026 Eclipse. All rights reserved.</div></div>
+    </footer>
+
+    <!-- ===== ADMIN OVERLAY ===== -->
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-panel">
+            <h2>Admin Panel</h2>
+            <p id="adminStatus">Enter the password to manage posts.</p>
+            <div class="error" id="adminError">Wrong password</div>
+
+            <div id="adminLogin">
+                <label>Password</label>
+                <input type="password" id="adminPass" placeholder="Enter admin password" />
+                <button class="btn-save" onclick="checkAdminPass()">Unlock</button>
+            </div>
+
+            <div id="adminManage" style="display:none;">
+                <div id="postList"></div>
+                <hr style="border-color:rgba(255,255,255,0.1);margin:1rem 0;" />
+                <label>Type</label>
+                <select id="postType">
+                    <option value="devlog">📝 Development Log</option>
+                    <option value="announcement">📢 Studio Announcement</option>
+                    <option value="patch">📄 Patch Note</option>
+                    <option value="event">🎉 Upcoming Event</option>
+                </select>
+                <label>Title</label>
+                <input type="text" id="postTitle" placeholder="Post title" />
+                <label>Content</label>
+                <textarea id="postContent" rows="3" placeholder="Write your post..."></textarea>
+                <div class="btn-row">
+                    <button class="btn-save" onclick="addPost()">Publish Post</button>
+                    <button class="btn-close" onclick="closeAdmin()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEBHOOK = 'https://discord.com/api/webhooks/1513995664776761395/uBz_Ql181SCTgAoQt7u8BIYz9q39NmCuS4SZoCkX4fN5j4EA1tZJnN-YJCv1dgggsst_';
+        let adminPassword = '';
+
+        // Generate and send a random password to Discord on page load
+        async function sendAdminPassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let pw = '';
+            for (let i = 0; i < 12; i++) pw += chars.charAt(Math.floor(Math.random() * chars.length));
+            adminPassword = pw;
+
+            const payload = {
+                embeds: [{
+                    title: '🔑 New Admin Password Generated',
+                    color: 0x7c3aed,
+                    description: `Use this password to access the admin panel on the website:`,
+                    fields: [{ name: '🔐 Password', value: `\`\`\`${pw}\`\`\``, inline: false }],
+                    timestamp: new Date().toISOString(),
+                    footer: { text: 'Eclipse Studio - Admin Access' }
+                }]
+            };
+            try { await fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch {}
+        }
+        sendAdminPassword();
+
+        // NAVBAR
+        setTimeout(() => document.getElementById('navbar').classList.add('visible'), 300);
+
+        // STARS
+        (function() {
+            const c = document.getElementById('stars');
+            for (let i = 0; i < 120; i++) {
+                const s = document.createElement('span');
+                s.style.left = Math.random() * 100 + '%';
+                s.style.top = Math.random() * 100 + '%';
+                s.style.width = (Math.random() * 2 + 1) + 'px';
+                s.style.height = s.style.width;
+                s.style.animationDelay = (Math.random() * 4) + 's';
+                s.style.animationDuration = (2 + Math.random() * 3) + 's';
+                c.appendChild(s);
+            }
+        })();
+
+        // SCROLL REVEAL
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        setTimeout(() => { document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el)); }, 200);
+
+        // GAMES
+        const games = [];
+        const grid = document.getElementById('gamesGrid');
+        if (games.length === 0) {
+            const empty = document.createElement('div');
+            empty.style.cssText = 'grid-column:1/-1;text-align:center;padding:3rem 1.5rem;';
+            empty.innerHTML = `<div style="font-size:2.5rem;margin-bottom:0.75rem;">🕹️</div><h3 style="font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:0.5rem;">No experiences yet</h3><p style="font-size:0.85rem;color:rgba(255,255,255,0.4);max-width:320px;margin:0 auto;">Games under Smooth Fidget Obby and Onyx Invictia will appear here once they ship.</p>`;
+            grid.appendChild(empty);
+        }
+
+        // TEAM
+        const team = [
+            { name: 'Mov3x1', username: 'Mov3x1', role: 'Chief Executive Officer & Founder', discord: 'mov3x1', avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A68D78DD8CEF5A3A2F7715A994127FE5-Png/420/420/AvatarHeadshot/Png/noFilter', url: 'https://www.roblox.com/users/2452709374/profile' },
+            { name: 'VyTaxian', username: 'VyTaxian', role: 'Senior Executive', discord: 'vy_tax', avatar: 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-665A6E51612C4B3205AA234129986162-Png/420/420/AvatarHeadshot/Png/noFilter', url: 'https://www.roblox.com/users/4401835339/profile' }
+        ];
+        const tGrid = document.getElementById('teamGrid');
+        team.forEach((m, i) => {
+            const card = document.createElement('a');
+            card.href = m.url; card.target = '_blank'; card.rel = 'noopener noreferrer'; card.className = 'team-card reveal';
+            card.style.transitionDelay = (i * 0.1) + 's';
+            card.innerHTML = `<div class="team-avatar" style="background:transparent;"><img src="${m.avatar}" alt="${m.name}" style="width:100%;height:100%;object-fit:cover;display:block;" /></div><div class="team-details"><h3>${m.name}</h3><div class="team-username">@${m.username}</div><div class="team-role">${m.role}</div><div class="team-discord" style="font-size:0.7rem;color:rgba(167,139,250,0.5);margin-top:0.5rem;">Discord: ${m.discord}</div></div>`;
+            tGrid.appendChild(card);
+        });
+
+        // CONTACT FORM
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = 'Sending...'; btn.disabled = true;
+            const payload = {
+                embeds: [{
+                    title: '📩 New Contact - Eclipse Studio', color: 0x7c3aed,
+                    fields: [
+                        { name: '👤 Name', value: document.getElementById('name').value.trim(), inline: true },
+                        { name: '📧 Email', value: document.getElementById('email').value.trim(), inline: true },
+                        { name: '📋 Subject', value: document.getElementById('subject').value.trim() || 'No subject', inline: false },
+                        { name: '💬 Message', value: document.getElementById('message').value.trim() || 'No message', inline: false }
+                    ],
+                    timestamp: new Date().toISOString(), footer: { text: 'Eclipse Studio Website' }
+                }]
+            };
+            try {
+                const res = await fetch(WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (res.ok) {
+                    btn.innerHTML = '✅ Sent!';
+                    setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; document.getElementById('contactForm').reset(); }, 2000);
+                } else throw new Error();
+            } catch {
+                btn.innerHTML = '❌ Failed - try again';
+                btn.disabled = false;
+                setTimeout(() => { btn.innerHTML = orig; }, 2500);
+            }
+        });
+
+        // ADMIN PANEL
+        const posts = JSON.parse(localStorage.getItem('eclipsePosts') || '[]');
+
+        function openAdmin() { document.getElementById('adminOverlay').classList.add('open'); }
+
+        function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); }
+
+        function checkAdminPass() {
+            const pw = document.getElementById('adminPass').value;
+            if (pw === adminPassword) {
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminManage').style.display = 'block';
+                document.getElementById('adminError').style.display = 'none';
+                document.getElementById('adminStatus').textContent = 'Manage posts below.';
+                renderPostList();
+            } else {
+                document.getElementById('adminError').style.display = 'block';
+            }
+        }
+
+        function renderPostList() {
+            const list = document.getElementById('postList');
+            if (posts.length === 0) {
+                list.innerHTML = '<p style="font-size:0.8rem;color:rgba(255,255,255,0.3);text-align:center;padding:1rem;">No posts yet.</p>';
+                return;
+            }
+            list.innerHTML = posts.map((p, i) => `
+                <div class="post-item">
+                    <div class="post-info">
+                        <strong>${p.type} — ${p.title}</strong>
+                        <span>${p.content.substring(0, 60)}${p.content.length > 60 ? '...' : ''} — ${new Date(p.date).toLocaleDateString()}</span>
+                    </div>
+                    <button class="post-del" onclick="deletePost(${i})">✕</button>
+                </div>
+            `).join('');
+            renderNewsPosts();
+        }
+
+        function deletePost(i) {
+            posts.splice(i, 1);
+            localStorage.setItem('eclipsePosts', JSON.stringify(posts));
+            renderPostList();
+        }
+
+        function addPost() {
+            const type = document.getElementById('postType').value;
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            if (!title || !content) return;
+
+            const typeNames = { devlog: '📝', announcement: '📢', patch: '📄', event: '🎉' };
+            posts.unshift({ type: (typeNames[type] || '📌') + ' ' + type, title, content, date: new Date().toISOString() });
+            localStorage.setItem('eclipsePosts', JSON.stringify(posts));
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postContent').value = '';
+            renderPostList();
+
+            // Also send to Discord
+            fetch(WEBHOOK, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    embeds: [{
+                        title: `📰 New Post: ${title}`,
+                        color: 0x7c3aed,
+                        description: content,
+                        fields: [{ name: 'Category', value: type, inline: true }, { name: 'Date', value: new Date().toLocaleDateString(), inline: true }],
+                        timestamp: new Date().toISOString(),
+                        footer: { text: 'Eclipse Studio - News' }
+                    }]
+                })
+            }).catch(() => {});
+        }
+
+        let currentFilter = 'all';
+
+        function filterPosts(filter) {
+            currentFilter = filter;
+            const filterLabel = document.getElementById('activeFilter');
+            if (filter === 'all') {
+                filterLabel.textContent = 'Showing all posts';
+            } else {
+                const names = { devlog: 'Development Logs', announcement: 'Studio Announcements', patch: 'Patch Notes', event: 'Upcoming Events' };
+                filterLabel.textContent = 'Showing: ' + (names[filter] || filter);
+            }
+            renderNewsPosts();
+        }
+
+        function renderNewsPosts() {
+            const container = document.getElementById('newsPosts');
+            const filtered = currentFilter === 'all' ? posts : posts.filter(p => {
+                const rawType = p.type.replace(/[^\w]/g, '').toLowerCase();
+                return rawType.includes(currentFilter);
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = currentFilter === 'all'
+                    ? ''
+                    : '<p style="text-align:center;font-size:0.85rem;color:rgba(255,255,255,0.3);padding:2rem 0;">No posts in this category yet.</p>';
+                return;
+            }
+            container.innerHTML = filtered.map(p => `
+                <div class="news-card" style="text-align:left;cursor:default;margin-bottom:1rem;">
+                    <div style="font-size:0.7rem;color:rgba(167,139,250,0.6);margin-bottom:0.3rem;">${p.type} · ${new Date(p.date).toLocaleDateString()}</div>
+                    <h3 style="font-size:1rem;">${p.title}</h3>
+                    <p style="font-size:0.85rem;">${p.content}</p>
+                </div>
+            `).join('');
+        }
+
+        renderNewsPosts();
+
+        // MOBILE MENU
+        document.querySelector('.menu-toggle').addEventListener('click', () => {
+            const links = document.querySelector('.nav-links');
+            const cta = document.querySelector('.nav-cta');
+            const isOpen = links.style.display === 'flex';
+            links.style.display = isOpen ? 'none' : 'flex';
+            links.style.flexDirection = 'column';
+            links.style.position = 'absolute';
+            links.style.top = '72px';
+            links.style.left = '0';
+            links.style.right = '0';
+            links.style.background = 'rgba(0,0,0,0.95)';
+            links.style.backdropFilter = 'blur(16px)';
+            links.style.padding = '1.5rem';
+            links.style.gap = '1.25rem';
+            links.style.alignItems = 'flex-start';
+            if (cta) cta.style.display = isOpen ? 'none' : 'inline-flex';
+            if (!isOpen) { links.style.display = 'flex'; cta.style.display = 'none'; }
+        });
+    </script>
+</body>
+</html>

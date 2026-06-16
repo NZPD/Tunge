@@ -1,0 +1,102 @@
+SNIPER DUELS - ROBLOX STUDIO SETUP GUIDE
+==========================================
+
+File Locations & Script Types:
+
+====================================================================
+FILE: src/Config/WeaponConfig.lua
+TYPE: ModuleScript
+LOCATION: ReplicatedStorage
+PATH: ReplicatedStorage > WeaponConfig
+====================================================================
+Contains all weapon stats (damage, fire rate, ammo, scope settings, etc.)
+Both server and client require this module.
+
+====================================================================
+FILE: src/ReplicatedStorage/RemoteEvents.lua
+TYPE: ModuleScript
+LOCATION: ReplicatedStorage
+PATH: ReplicatedStorage > RemoteEvents
+====================================================================
+Auto-creates all RemoteEvent objects when ran.
+Used for communication between server and client.
+
+====================================================================
+FILE: src/Server/Main.server.lua
+TYPE: Script (Server Script)
+LOCATION: ServerScriptService
+PATH: ServerScriptService > SniperDuelsMain
+====================================================================
+Entry point for the server. Starts the match on game start.
+Do NOT put this in a child of another script - it's a standalone Script.
+
+====================================================================
+FILE: src/Server/MatchManager.server.lua
+TYPE: ModuleScript
+LOCATION: ServerScriptService
+PATH: ServerScriptService > MatchManager
+====================================================================
+Manages match lifecycle:
+- Tracks which players are in a match (InMatch = true/false)
+- Spawns players with sniper tool
+- Handles death/respawn
+- ONLY gives guns to players when they are in a match
+- GunHandler checks IsPlayerInMatch() before letting anyone shoot
+
+====================================================================
+FILE: src/Server/GunHandler.server.lua
+TYPE: ModuleScript
+LOCATION: ServerScriptService
+PATH: ServerScriptService > GunHandler
+====================================================================
+Server-side ballistic system:
+- Listens for FireBullet RemoteEvent
+- REFUSES to process if player is NOT in a match (MatchManager check)
+- Step-based raycast with bullet drop gravity
+- Damage calculation with falloff
+- Headshot detection
+- Server-authoritative hit registration
+
+====================================================================
+FILE: src/Client/Main.client.lua
+TYPE: LocalScript
+LOCATION: StarterPlayerScripts
+PATH: StarterPlayer > StarterPlayerScripts > SniperDuelsClient
+====================================================================
+Entry point for the client. Hides default UI, loads GunController.
+Fires ClientReady to server.
+
+====================================================================
+FILE: src/Client/GunController.client.lua
+TYPE: ModuleScript
+LOCATION: StarterPlayer > StarterPlayerScripts
+PATH: StarterPlayer > StarterPlayerScripts > GunController
+====================================================================
+All client-side gameplay:
+- First-person camera control
+- Input handling (shoot, scope, reload, breath-hold)
+- GUI creation (crosshair, ammo display, hitmarker, scope overlay, kill feed)
+- Weapon sway and recoil visualization
+- ONLY fires weapons or shows UI when inMatch = true
+- Sound effects
+
+====================================================================
+HOW MATCH-GATED GUNS WORK:
+====================================================================
+1. Server's Main.server.lua calls MatchManager:StartMatch()
+2. MatchManager sets all players' InMatch = true
+3. MatchManager spawns each player with a sniper tool
+4. Client's GunController receives MatchStateChanged("InProgress")
+5. GunController sets state.inMatch = true, enables UI and inputs
+6. When player shoots, GunHandler checks if player is in match
+7. If not in match (match ended, not joined), GunHandler IGNORES the shot
+8. When match ends, InMatch = false, guns disabled for everyone
+
+====================================================================
+REQUIRED WORKSPACE SETUP:
+====================================================================
+- (Optional) Create a folder "SpawnLocations" in workspace
+- Place SpawnLocation parts inside it for spawn points
+- If none exist, players spawn at 0,10,0
+
+====================================================================

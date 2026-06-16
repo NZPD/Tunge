@@ -1,0 +1,21 @@
+============================================================
+  GAME: z50jn9's Place
+============================================================
+
+Place ID:       12803586631
+Universe ID:    4483381587
+Creator:        z50jn9
+Genre:          All
+Age Rating:     
+Visits:         2
+Favorites:      0
+Playing Now:    0
+Like Ratio:     0
+Price:          None Robux
+Copying Allowed:False
+
+Description:
+This is your very first Roblox creation. Check it out, then make it your own with Roblox Studio!
+
+Fetched: 2026-06-12 18:00:25 UTC
+Icon URL: https://t0.rbxcdn.com/180DAY-8c353be34538e596bc21c155a27da5bf

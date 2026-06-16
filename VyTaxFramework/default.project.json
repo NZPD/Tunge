@@ -1,0 +1,27 @@
+{
+	"name": "VyTaxFramework",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"VyTax": {
+				"$path": "src/VyTax"
+			}
+		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"VyTaxServer": {
+				"$path": "src/Server"
+			}
+		},
+		"StarterPlayer": {
+			"$className": "StarterPlayer",
+			"StarterPlayerScripts": {
+				"$className": "StarterPlayerScripts",
+				"VyTaxClient": {
+					"$path": "src/Client"
+				}
+			}
+		}
+	}
+}
